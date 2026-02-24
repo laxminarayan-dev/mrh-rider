@@ -1,15 +1,18 @@
 import { Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView } from "react-native";
 
 function History() {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text style={{ fontSize: 20, fontWeight: "bold", color: "white" }}>
-          History
-        </Text>
+
+    <ScrollView
+      className="bg-[#09090b]"
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 48, paddingTop: 24 }}
+    >
+      <View style={{ marginHorizontal: 20, marginTop: 20 }}>
+        <Text>History </Text>
       </View>
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 

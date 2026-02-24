@@ -1,11 +1,11 @@
 import { Stack } from "expo-router";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import "../global.css";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 
+// KeyboardProvider is REQUIRED for useKeyboardHandler to receive native callbacks
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
+    <KeyboardProvider>
       <Stack screenOptions={{ headerShown: false }} />
-    </SafeAreaProvider>
+    </KeyboardProvider>
   );
 }

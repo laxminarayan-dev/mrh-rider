@@ -1,8 +1,13 @@
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
 import { Redirect } from "expo-router";
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useRef, useState } from "react";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useKeyboardHandler } from "react-native-keyboard-controller";
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,253 +15,161 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [focusedField, setFocusedField] = useState(null);
   const [error, setError] = useState("");
-
   const [redirectToHome, setRedirectToHome] = useState(false);
+  const scrollRef = useRef();
+
+  const { bottom: bottomInset } = useSafeAreaInsets();
+
+  const keyboardHeight = useSharedValue(0);
+  const scrollToBottom = () => {
+    scrollRef.current?.scrollToEnd({ animated: true });
+  };
+
+  useKeyboardHandler({
+    onMove: (e) => {
+      "worklet";
+      keyboardHeight.value = e.height;
+    },
+    onEnd: (e) => {
+      "worklet";
+      keyboardHeight.value = e.height;
+      runOnJS(scrollToBottom)();
+    },
+  });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+
+    // Subtract bottomInset so we don't double-count what SafeAreaView already handles
+    marginBottom: Math.max(0, keyboardHeight.value - bottomInset),
+  }));
+
 
   const handleLogin = async () => {
     if (email === "lucky@mrhalwai.in" && password === "password") {
       await AsyncStorage.setItem("userToken", email + password);
-      setRedirectToHome(true); // trigger redirect via state
+      setRedirectToHome(true);
     } else {
       setError("Invalid email or password");
     }
   };
 
-  // In your JSX, before the return:
   if (redirectToHome) return <Redirect href="/(tabs)" />;
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Background circles for depth */}
-      <View style={styles.circle1} />
-      <View style={styles.circle2} />
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#09090b" }}
+      edges={["top", "left", "right"]}
+    >
+      <Animated.View style={[{ flex: 1, padding: 20, justifyContent: "center", gap: 20 }, animatedStyle]}>
+        <ScrollView
+          ref={scrollRef}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 20,
+            paddingTop: 24,
+            paddingBottom: 24,
+          }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          keyboardDismissMode="none"
+        >
+          {/* Background circles */}
+          <View style={{ position: "absolute", width: 320, height: 320, borderRadius: 160, backgroundColor: "rgba(251, 191, 36, 0.08)", top: -80, right: -40 }} />
+          <View style={{ position: "absolute", width: 256, height: 256, borderRadius: 128, backgroundColor: "rgba(129, 140, 248, 0.08)", bottom: -40, left: -40 }} />
 
-      {error && (
-        <View className="absolute inset-0 z-50 bg-white/30 items-center justify-center px-6">
-          {/* Card */}
-          <View className="w-full max-w-sm bg-neutral-900 border border-white/10 rounded-2xl p-6 shadow-xl">
-            {/* Title */}
-            <Text className="text-white text-lg font-semibold mb-1">
-              Something went wrong
-            </Text>
-
-            {/* Message */}
-            <Text className="text-red-500 text-md mb-5 leading-5">{error}</Text>
-
-            {/* Button */}
-            <Pressable
-              onPress={() => setError(null)}
-              className="self-end bg-indigo-500 px-4 py-2 rounded-lg active:bg-indigo-600"
-            >
-              <Text className="text-white font-medium text-sm">Dismiss</Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
-
-      <View style={styles.card}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logoIcon}>🚀</Text>
-          </View>
-          <Text style={styles.title}>Welcome back</Text>
-          <Text style={styles.subtitle}>Sign in to your account</Text>
-        </View>
-
-        {/* Form */}
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={[
-                styles.input,
-                focusedField === "email" && styles.inputFocused,
-              ]}
-              placeholder="you@example.com"
-              placeholderTextColor="#6B7280"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-              onFocus={() => setFocusedField("email")}
-              onBlur={() => setFocusedField(null)}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <View style={styles.labelRow}>
-              <Text style={styles.label}>Password</Text>
+          {/* Error Modal */}
+          {error ? (
+            <View style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", alignItems: "center", zIndex: 50 }}>
+              <View style={{ width: "90%", maxWidth: 320, backgroundColor: "#111113", borderWidth: 1, borderColor: "#1c1c1e", borderRadius: 16, padding: 24, alignItems: "center" }}>
+                <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(239,68,68,0.1)", borderWidth: 1.5, borderColor: "rgba(239,68,68,0.3)", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                  <Feather name="alert-circle" size={24} color="#ef4444" />
+                </View>
+                <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700", marginBottom: 8 }}>Invalid Credentials</Text>
+                <Text style={{ color: "#ef4444", fontSize: 13, textAlign: "center", marginBottom: 20 }}>{error}</Text>
+                <Pressable onPress={() => setError("")} style={{ width: "100%", backgroundColor: "#fbbf24", paddingVertical: 12, borderRadius: 12, alignItems: "center" }}>
+                  <Text style={{ color: "#000", fontWeight: "800", fontSize: 14 }}>Try Again</Text>
+                </Pressable>
+              </View>
             </View>
-            <TextInput
-              style={[
-                styles.input,
-                focusedField === "password" && styles.inputFocused,
-              ]}
-              placeholder="••••••••"
-              placeholderTextColor="#6B7280"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-              onFocus={() => setFocusedField("password")}
-              onBlur={() => setFocusedField(null)}
-            />
-          </View>
+          ) : null}
 
-          {/* <Pressable style={styles.button} onPress={() => {}}> */}
-          <Pressable
-            style={[styles.button, isPressed && styles.buttonPressed]}
-            onPressIn={() => setIsPressed(true)}
-            onPressOut={() => setIsPressed(false)}
-            onPress={handleLogin}
-          >
-            <Text className="text-white font-bold text-lg">Sign In</Text>
-          </Pressable>
-        </View>
-      </View>
+          {/* Main Card */}
+          <View style={{ width: "100%", backgroundColor: "#111113", borderWidth: 1, borderColor: "#1c1c1e", borderRadius: 24, padding: 28, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 20, elevation: 8 }}>
+            {/* Header */}
+            <View style={{ alignItems: "center", marginBottom: 32 }}>
+              <View style={{ width: 64, height: 64, borderRadius: 16, backgroundColor: "#1a202c", borderWidth: 2, borderColor: "#fbbf24", alignItems: "center", justifyContent: "center", marginBottom: 20, shadowColor: "#fbbf24", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
+                <MaterialCommunityIcons name="motorbike" size={28} color="#fbbf24" />
+              </View>
+              <Text style={{ color: "#a5b4fc", fontSize: 12, fontWeight: "500", marginBottom: 8 }}>Welcome to</Text>
+              <Text style={{ color: "#fff", fontSize: 28, fontWeight: "900", letterSpacing: -0.5, marginBottom: 8 }}>MRH Rider</Text>
+              <Text style={{ color: "#a5b4fc", fontSize: 14, fontWeight: "500" }}>Sign in as a rider</Text>
+            </View>
+
+            {/* Form */}
+            <View style={{ gap: 16 }}>
+              {/* Email */}
+              <View>
+                <Text style={{ color: "#d1d5db", fontSize: 12, fontWeight: "600", letterSpacing: 0.3, marginBottom: 8, textTransform: "uppercase" }}>Email Address</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "#1a202c", borderWidth: 1.5, borderColor: focusedField === "email" ? "#fbbf24" : "#2d3748", borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12 }}>
+                  <Feather name="mail" size={18} color={focusedField === "email" ? "#fbbf24" : "#6b7280"} style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={{ flex: 1, color: "#f9fafb", fontSize: 15, fontWeight: "500" }}
+                    placeholder="you@example.com"
+                    placeholderTextColor="#6b7280"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    value={email}
+                    onChangeText={setEmail}
+                    onFocus={() => setFocusedField("email")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </View>
+              </View>
+
+              {/* Password */}
+              <View>
+                <Text style={{ color: "#d1d5db", fontSize: 12, fontWeight: "600", letterSpacing: 0.3, marginBottom: 8, textTransform: "uppercase" }}>Password</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "#1a202c", borderWidth: 1.5, borderColor: focusedField === "password" ? "#fbbf24" : "#2d3748", borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12 }}>
+                  <Feather name="lock" size={18} color={focusedField === "password" ? "#fbbf24" : "#6b7280"} style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={{ flex: 1, color: "#f9fafb", fontSize: 15, fontWeight: "500" }}
+                    placeholder="••••••••"
+                    placeholderTextColor="#6b7280"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                    onFocus={() => setFocusedField("password")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </View>
+              </View>
+
+              {/* Sign In Button */}
+              <Pressable
+                style={{ marginTop: 8, borderRadius: 16, overflow: "hidden", shadowColor: "#fbbf24", shadowOffset: { width: 0, height: 4 }, shadowOpacity: isPressed ? 0.15 : 0.3, shadowRadius: 12, elevation: isPressed ? 3 : 6 }}
+                onPressIn={() => setIsPressed(true)}
+                onPressOut={() => setIsPressed(false)}
+                onPress={handleLogin}
+              >
+                <LinearGradient colors={["#fbbf24", "#f59e0b"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ paddingVertical: 15, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <Text style={{ color: "#000", fontSize: 16, fontWeight: "900", letterSpacing: 0.3 }}>Sign In</Text>
+                  <Feather name="arrow-right" size={18} color="#000" />
+                </LinearGradient>
+              </Pressable>
+
+              {/* Demo hint */}
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "rgba(129,140,248,0.1)", borderWidth: 1, borderColor: "rgba(129,140,248,0.2)", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginTop: 8 }}>
+                <Feather name="info" size={14} color="#a5b4fc" />
+                <Text style={{ flex: 1, color: "#a5b4fc", fontSize: 12, fontWeight: "500" }}>Demo: lucky@mrhalwai.in / password</Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </Animated.View>
+
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0A0A0F",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  // Decorative background circles
-  circle1: {
-    position: "absolute",
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: "#4F46E510",
-    top: -60,
-    right: -80,
-  },
-  circle2: {
-    position: "absolute",
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: "#7C3AED10",
-    bottom: 60,
-    left: -60,
-  },
-
-  // Card
-  card: {
-    width: "88%",
-    backgroundColor: "#13131A",
-    borderRadius: 24,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: "#ffffff0D",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.5,
-    shadowRadius: 40,
-    elevation: 10,
-    zIndex: 10,
-  },
-
-  // Header
-  header: {
-    alignItems: "center",
-    marginBottom: 32,
-  },
-  logoContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: "#4F46E520",
-    borderWidth: 1,
-    borderColor: "#4F46E540",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  logoIcon: {
-    fontSize: 26,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#F9FAFB",
-    letterSpacing: -0.5,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-
-  // Form
-  form: {
-    gap: 16,
-  },
-  inputGroup: {
-    gap: 6,
-  },
-  labelRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#D1D5DB",
-    marginBottom: 2,
-  },
-  forgotText: {
-    fontSize: 13,
-    color: "#6366F1",
-    fontWeight: "500",
-  },
-  input: {
-    backgroundColor: "#1E1E2A",
-    borderWidth: 1,
-    borderColor: "#2D2D3A",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 15,
-    color: "#F9FAFB",
-  },
-  inputFocused: {
-    borderColor: "#6366F1",
-    backgroundColor: "#1E1E2A",
-    shadowColor: "#6366F1",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
-
-  // Button
-  button: {
-    backgroundColor: "#6366F1",
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: "center",
-    marginTop: 4,
-    shadowColor: "#6366F1",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: "#6366F140",
-  },
-  buttonPressed: {
-    backgroundColor: "#4F46E5",
-    shadowOpacity: 0.2,
-  },
-  buttonText: {
-    color: "#0A0A0F",
-    fontSize: 16,
-    fontWeight: "800",
-    letterSpacing: 0.3,
-  },
-});
