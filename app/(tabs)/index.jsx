@@ -1,3 +1,6 @@
+import {
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
@@ -7,10 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
-import { StatCard, WelcomeCard, EmptyState, OrderRow } from "../../components/mycomponents/HomeComponents";
+import { EmptyState, OrderRow, StatCard, WelcomeCard } from "../../components/mycomponents/HomeComponents";
 
 const STATS = [
   {
@@ -76,6 +76,7 @@ export default function Home() {
   return (
     <ScrollView
       className="bg-[#09090b]"
+      style={{ flex: 1, backgroundColor: "#09090b" }}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 48, paddingTop: 24 }}
     >

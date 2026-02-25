@@ -1,11 +1,11 @@
-import { Text, View } from "react-native";
-import { ScrollView } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 function History() {
   return (
 
     <ScrollView
       className="bg-[#09090b]"
+      style={{ flex: 1, backgroundColor: "#09090b" }}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 48, paddingTop: 24 }}
     >
