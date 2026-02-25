@@ -1,10 +1,4 @@
 import {
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Redirect } from "expo-router";
-import { useEffect, useState } from "react";
-import {
   ScrollView,
   Text,
   TouchableOpacity,
@@ -48,30 +42,6 @@ const ORDERS = [];
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function Home() {
-  const [loading, setLoading] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = await AsyncStorage.getItem("userToken");
-      setLoggedIn(!!token);
-      setLoading(false);
-    };
-    checkAuth();
-  }, []);
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, backgroundColor: "#09090b", alignItems: "center", justifyContent: "center" }}>
-        <MaterialCommunityIcons name="motorbike" size={36} color="#fbbf24" />
-        <Text style={{ color: "#3f3f46", fontSize: 12, letterSpacing: 4, marginTop: 16, textTransform: "uppercase" }}>
-          Loading...
-        </Text>
-      </View>
-    );
-  }
-
-  if (!loggedIn) return <Redirect href="/(auth)/login" />;
 
   return (
     <ScrollView

@@ -2,11 +2,12 @@ import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useRef, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 
 export default function Login() {
@@ -53,14 +54,13 @@ export default function Login() {
     }
   };
 
-  if (redirectToHome) return <Redirect href="/(tabs)" />;
+  if (redirectToHome) return <Redirect href="/" />;
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#09090b" }}
-      edges={["top", "left", "right"]}
-    >
-      <Animated.View style={[{ flex: 1, padding: 20, justifyContent: "center", gap: 20 }, animatedStyle]}>
+
+    <View style={{ flex: 1, backgroundColor: "#09090b" }}>
+      <StatusBar barStyle="light-content" backgroundColor="#09090b" />
+      <Animated.View style={[{ flex: 1, justifyContent: "center", gap: 20 }, animatedStyle]}>
         <ScrollView
           ref={scrollRef}
           style={{ flex: 1 }}
@@ -68,16 +68,14 @@ export default function Login() {
             flexGrow: 1,
             justifyContent: "center",
             alignItems: "center",
-            paddingHorizontal: 20,
-            paddingTop: 24,
-            paddingBottom: 24,
+            padding: 24,
           }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="none"
         >
           {/* Background circles */}
-          <View style={{ position: "absolute", width: 320, height: 320, borderRadius: 160, backgroundColor: "rgba(251, 191, 36, 0.08)", top: -80, right: -40 }} />
+          <View style={{ position: "absolute", width: 320, height: 320, borderRadius: 160, backgroundColor: "rgba(251, 191, 36, 0.08)", top: -70, right: -40 }} />
           <View style={{ position: "absolute", width: 256, height: 256, borderRadius: 128, backgroundColor: "rgba(129, 140, 248, 0.08)", bottom: -40, left: -40 }} />
 
           {/* Error Modal */}
@@ -97,7 +95,7 @@ export default function Login() {
           ) : null}
 
           {/* Main Card */}
-          <View style={{ width: "100%", backgroundColor: "#111113", borderWidth: 1, borderColor: "#1c1c1e", borderRadius: 24, padding: 28, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 20, elevation: 8 }}>
+          <View style={{ width: "100%", backgroundColor: "#111113", borderWidth: 1, borderColor: "#1c1c1e", borderRadius: 24, paddingHorizontal: 28, paddingVertical: 30, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 20, elevation: 8 }}>
             {/* Header */}
             <View style={{ alignItems: "center", marginBottom: 32 }}>
               <View style={{ width: 64, height: 64, borderRadius: 16, backgroundColor: "#1a202c", borderWidth: 2, borderColor: "#fbbf24", alignItems: "center", justifyContent: "center", marginBottom: 20, shadowColor: "#fbbf24", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
@@ -169,7 +167,6 @@ export default function Login() {
           </View>
         </ScrollView>
       </Animated.View>
-
-    </SafeAreaView>
+    </View>
   );
 }

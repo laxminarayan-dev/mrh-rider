@@ -1,4 +1,5 @@
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef } from "react";
@@ -55,10 +56,14 @@ export default function Header({ handleLogout }) {
               justifyContent: "center",
             }}
           >
-            <MaterialCommunityIcons
+            {/* <MaterialCommunityIcons
               name="motorbike"
               size={24}
               color="#fbbf24"
+            /> */}
+            <Image
+              source={require("../../assets/myImages/bicycle.png")}
+              style={{ width: 24, height: 24, resizeMode: "contain" }}
             />
           </View>
           <View>

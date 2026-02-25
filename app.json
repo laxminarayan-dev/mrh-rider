@@ -4,15 +4,25 @@
     "slug": "rider-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/myImages/bicycle-big.png",
     "scheme": "riderapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/myImages/bicycle-big.png",
+      "resizeMode": "fit",
+      "backgroundColor": "#000"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.riderapp",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "splash": {
+        "image": "./assets/myImages/bicycle-big.png",
+        "resizeMode": "fit",
+        "backgroundColor": "#000"
       }
     },
     "android": {
@@ -25,7 +35,12 @@
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
-      "package": "com.anonymous.riderapp"
+      "package": "com.anonymous.riderapp",
+      "splash": {
+        "image": "./assets/myImages/bicycle-big.png",
+        "resizeMode": "fit",
+        "backgroundColor": "#000"
+      }
     },
     "web": {
       "output": "static",
@@ -37,12 +52,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/myImages/bicycle-big.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "resizeMode": "fit",
+          "backgroundColor": "#000",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#000"
           }
         }
       ]
