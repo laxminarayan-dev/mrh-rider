@@ -1,76 +1,43 @@
 {
   "expo": {
-    "name": "rider-app",
+    "name": "MRH Rider",
     "slug": "rider-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/myImages/bicycle-big.png",
+    "icon": "./assets/myImages/splash.png",
     "scheme": "riderapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/myImages/bicycle-big.png",
-      "resizeMode": "fit",
-      "backgroundColor": "#000"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.riderapp",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      },
-      "splash": {
-        "image": "./assets/myImages/bicycle-big.png",
-        "resizeMode": "fit",
-        "backgroundColor": "#000"
-      }
+      "image": "./assets/myImages/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090b"
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "edgeToEdgeEnabled": false,
-      "predictiveBackGestureEnabled": false,
-      "softwareKeyboardLayoutMode": "resize",
       "package": "com.anonymous.riderapp",
       "splash": {
-        "image": "./assets/myImages/bicycle-big.png",
-        "resizeMode": "fit",
-        "backgroundColor": "#000"
+        "image": "./assets/myImages/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#09090b"
       }
     },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png",
-      "bundler": "metro"
+    "ios": {
+      "bundleIdentifier": "com.anonymous.riderapp",
+      "splash": {
+        "image": "./assets/myImages/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#09090b"
+      }
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/myImages/bicycle-big.png",
-          "imageWidth": 200,
-          "resizeMode": "fit",
-          "backgroundColor": "#000",
-          "dark": {
-            "backgroundColor": "#000"
-          }
+          "image": "./assets/myImages/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#09090b"
         }
       ]
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "04d34f17-08ca-4538-8bd8-5a7fd63a422c"
-      }
-    }
+    ]
   }
 }
