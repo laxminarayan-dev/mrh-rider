@@ -1,12 +1,20 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Tabs, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../components/mycomponents/Header";
 
 export default function TabsLayout() {
+  const router = useRouter();
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("userToken");
+    // Handle logout navigation if needed
+    console.log("logout");
+    router.replace("/(auth)/login");
+  };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#09090b" }}>
-      <Header />
+      <Header handleLogout={handleLogout} />
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -54,6 +62,6 @@ export default function TabsLayout() {
           }}
         />
       </Tabs>
-    </SafeAreaView >
+    </SafeAreaView>
   );
 }
