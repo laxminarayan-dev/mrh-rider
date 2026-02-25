@@ -1,7 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 
@@ -19,7 +18,6 @@ export default function Header({ handleLogout }) {
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#09090b" />
       <Animated.View
         style={{
           opacity: anim,
@@ -63,7 +61,8 @@ export default function Header({ handleLogout }) {
             /> */}
             <Image
               source={require("../../assets/myImages/bicycle.png")}
-              style={{ width: 24, height: 24, resizeMode: "contain" }}
+              style={{ width: 24, height: 24 }}
+              contentFit="contain"
             />
           </View>
           <View>

@@ -12,6 +12,7 @@ export default function TabsLayout() {
     console.log("logout");
     router.replace("/(auth)/login");
   };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#09090b" }}>
       <Header handleLogout={handleLogout} />

@@ -1,18 +1,17 @@
-import { useEffect, useRef } from "react";
+import {
+    Feather,
+    FontAwesome5,
+    MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useRef, useState } from "react";
 import {
     Animated,
+    Dimensions,
     Text,
     TouchableOpacity,
     View,
-    Dimensions,
 } from "react-native";
-import {
-    MaterialCommunityIcons,
-    FontAwesome5,
-    Feather,
-} from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
@@ -73,10 +72,11 @@ export function PulseRing({ color = "#fbbf24", delay = 0 }) {
 }
 
 // ─── Hero Welcome Card ───────────────────────────────────────────────────────
-export function WelcomeCard() {
-    const router = useRouter();
+export function WelcomeCard({ isOnline = false, onToggleOnline = () => { } }) {
     const anim = useRef(new Animated.Value(0)).current;
     const shimmer = useRef(new Animated.Value(0)).current;
+
+    const [isConfirmationModelVisible, setConfirmationModelVisible] = useState(false);
 
     useEffect(() => {
         Animated.spring(anim, {
@@ -96,120 +96,195 @@ export function WelcomeCard() {
     }, []);
 
     return (
-        <Animated.View
-            style={{
-                opacity: anim,
-                transform: [
-                    { scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) },
-                ],
-                marginHorizontal: 20,
-                marginBottom: 28,
-                borderRadius: 28,
-                overflow: "hidden",
-                shadowColor: "#6366f1",
-                shadowOffset: { width: 0, height: 12 },
-                shadowOpacity: 0.4,
-                shadowRadius: 20,
-                elevation: 12,
-            }}
-        >
-            <LinearGradient
-                colors={["#1a202c", "#2d3748", "#1a202c"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ padding: 24 }}
+        <>
+            <Animated.View
+                style={{
+                    opacity: anim,
+                    transform: [
+                        { scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) },
+                    ],
+                    marginHorizontal: 20,
+                    marginBottom: 28,
+                    borderRadius: 28,
+                    overflow: "hidden",
+                    shadowColor: "#6366f1",
+                    shadowOffset: { width: 0, height: 12 },
+                    shadowOpacity: 0.4,
+                    shadowRadius: 20,
+                    elevation: 12,
+                }}
             >
-                {/* Decorative circle top-right */}
-                <View
-                    style={{
-                        position: "absolute",
-                        top: -30,
-                        right: -30,
-                        width: 130,
-                        height: 130,
-                        borderRadius: 65,
-                        backgroundColor: "rgba(129,140,248,0.08)",
-                        borderWidth: 1,
-                        borderColor: "rgba(129,140,248,0.12)",
-                    }}
-                />
-                <View
-                    style={{
-                        position: "absolute",
-                        top: 10,
-                        right: 10,
-                        width: 70,
-                        height: 70,
-                        borderRadius: 35,
-                        backgroundColor: "rgba(251,191,36,0.06)",
-                    }}
-                />
+                <LinearGradient
+                    colors={["#1a202c", "#2d3748", "#1a202c"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{ padding: 24 }}
+                >
+                    {/* Decorative circle top-right */}
+                    <View
+                        style={{
+                            position: "absolute",
+                            top: -30,
+                            right: -30,
+                            width: 130,
+                            height: 130,
+                            borderRadius: 65,
+                            backgroundColor: "rgba(129,140,248,0.08)",
+                            borderWidth: 1,
+                            borderColor: "rgba(129,140,248,0.12)",
+                        }}
+                    />
+                    <View
+                        style={{
+                            position: "absolute",
+                            top: 10,
+                            right: 10,
+                            width: 70,
+                            height: 70,
+                            borderRadius: 35,
+                            backgroundColor: "rgba(251,191,36,0.06)",
+                        }}
+                    />
 
-                {/* Avatar + Name row */}
-                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
-                    <View style={{ position: "relative", alignItems: "center", justifyContent: "center", marginRight: 16 }}>
-                        <PulseRing color="#fbbf24" delay={0} />
-                        <PulseRing color="#fbbf24" delay={600} />
-                        <View
-                            style={{
-                                width: 56,
-                                height: 56,
-                                borderRadius: 28,
-                                backgroundColor: "rgba(99,102,241,0.25)",
-                                borderWidth: 2,
-                                borderColor: "rgba(129,140,248,0.5)",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <FontAwesome5 name="user-alt" size={22} color="#c7d2fe" />
+                    {/* Avatar + Name row */}
+                    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
+                        <View style={{ position: "relative", alignItems: "center", justifyContent: "center", marginRight: 16 }}>
+                            <PulseRing color="#fbbf24" delay={0} />
+                            <PulseRing color="#fbbf24" delay={600} />
+                            <View
+                                style={{
+                                    width: 56,
+                                    height: 56,
+                                    borderRadius: 28,
+                                    backgroundColor: "rgba(99,102,241,0.25)",
+                                    borderWidth: 2,
+                                    borderColor: "rgba(129,140,248,0.5)",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <FontAwesome5 name="user-alt" size={22} color="#c7d2fe" />
+                            </View>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 10, color: "#fbbf24", fontWeight: "800", letterSpacing: 2.5, textTransform: "uppercase", marginBottom: 4 }}>
+                                Welcome back
+                            </Text>
+                            <Text style={{ fontSize: 26, color: "#fff", fontWeight: "900", letterSpacing: -0.5 }}>
+                                Lucky Jaiswal
+                            </Text>
+                        </View>
+
+                        {/* Online/Offline badge */}
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: isOnline ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)", borderWidth: 1, borderColor: isOnline ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)", borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 }}>
+                            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isOnline ? "#22c55e" : "#ef4444" }} />
+                            <Text style={{ color: isOnline ? "#4ade80" : "#f87171", fontSize: 11, fontWeight: "700" }}>{isOnline ? "Online" : "Offline"}</Text>
                         </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 10, color: "#fbbf24", fontWeight: "800", letterSpacing: 2.5, textTransform: "uppercase", marginBottom: 4 }}>
-                            Welcome back
-                        </Text>
-                        <Text style={{ fontSize: 26, color: "#fff", fontWeight: "900", letterSpacing: -0.5 }}>
-                            Lucky Jaiswal
-                        </Text>
-                    </View>
 
-                    {/* Online badge */}
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "rgba(34,197,94,0.15)", borderWidth: 1, borderColor: "rgba(34,197,94,0.3)", borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 }}>
-                        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#22c55e" }} />
-                        <Text style={{ color: "#4ade80", fontSize: 11, fontWeight: "700" }}>Online</Text>
+                    {/* Divider */}
+                    <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)", marginBottom: 18 }} />
+
+                    {/* Info text */}
+                    <Text style={{ color: "#a5b4fc", fontSize: 13, lineHeight: 20, fontWeight: "500", marginBottom: 20 }}>
+                        Your admin will assign deliveries and they'll appear here. Stay ready to earn!
+                    </Text>
+
+                    {/* CTA */}
+                    <TouchableOpacity
+                        activeOpacity={0.85}
+                        style={{
+                            borderRadius: 16,
+                            paddingVertical: 14,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 10,
+                            overflow: "hidden",
+                        }}
+                        onPress={() => { setConfirmationModelVisible(true) }}
+                    >
+                        <LinearGradient
+                            colors={!isOnline ? ["#22c55e", "#16a34a"] : ["#ef4444", "#dc2626"]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                borderRadius: 16,
+                            }}
+                        />
+                        <View
+                            style={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: 5,
+                                backgroundColor: "#fff",
+                                shadowColor: "#fff",
+                                shadowOffset: { width: 0, height: 0 },
+                                shadowOpacity: 0.8,
+                                shadowRadius: 6,
+                                elevation: 4,
+                            }}
+                        />
+                        <Text style={{ color: "#fff", fontWeight: "900", fontSize: 15, letterSpacing: 0.5 }}>
+                            GO {isOnline ? "OFFLINE" : "ONLINE"}
+                        </Text>
+                        <Feather name="radio" size={16} color="#fff" />
+                    </TouchableOpacity>
+                </LinearGradient>
+
+            </Animated.View>
+
+            {/* Confermation Model */}
+
+            {isConfirmationModelVisible && <View style={{
+                position: "absolute", top: -150, left: 0, right: 0, bottom: 0,
+                backgroundColor: "rgba(0,0,0,0.6)",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 10,
+            }}>
+                <View style={{
+                    backgroundColor: "#1a202c",
+                    borderRadius: 28,
+                    padding: 24,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 20,
+                    width: "80%",
+                    height: 220,
+                }}>
+                    <Text style={{ color: "#fbbf24", fontSize: 18, fontWeight: "900", letterSpacing: -0.3 }}>
+                        Are you sure?
+                    </Text>
+                    <Text style={{ color: "#a5b4fc", fontSize: 13, lineHeight: 20, fontWeight: "500", textAlign: "center" }}>
+                        Do you want to go {isOnline ? "offline" : "online"}? You won't receive new deliveries until you go back online.
+                    </Text>
+                    <View style={{ flexDirection: "row", gap: 12 }}>
+                        <TouchableOpacity
+                            style={{ flex: 1, backgroundColor: "#374151", paddingVertical: 12, borderRadius: 12, alignItems: "center" }}
+                            onPress={() => setConfirmationModelVisible(false)}
+                        >
+                            <Text style={{ color: "#d1d5db", fontWeight: "700", fontSize: 14 }}>Cancel</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ flex: 1, backgroundColor: "#fbbf24", paddingVertical: 12, borderRadius: 12, alignItems: "center" }}
+                            onPress={() => {
+                                setConfirmationModelVisible(false);
+                                onToggleOnline();
+                            }}
+                        >
+                            <Text style={{ color: "#000", fontWeight: "800", fontSize: 14 }}>Yes, {isOnline ? "Go Offline" : "Go Online"}</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
+            </View>}
 
-                {/* Divider */}
-                <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)", marginBottom: 18 }} />
-
-                {/* Info text */}
-                <Text style={{ color: "#a5b4fc", fontSize: 13, lineHeight: 20, fontWeight: "500", marginBottom: 20 }}>
-                    Your admin will assign deliveries and they'll appear here. Stay ready to earn!
-                </Text>
-
-                {/* CTA */}
-                <TouchableOpacity
-                    activeOpacity={0.85}
-                    style={{
-                        backgroundColor: "#fbbf24",
-                        borderRadius: 16,
-                        paddingVertical: 14,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 8,
-                    }}
-                    onPress={() => router.push("/current")}
-                >
-                    <Text style={{ color: "#fff", fontWeight: "900", fontSize: 15, letterSpacing: 0.2 }}>
-                        View My Orders
-                    </Text>
-                    <Feather name="arrow-right" size={16} color="#fff" />
-                </TouchableOpacity>
-            </LinearGradient>
-        </Animated.View>
+        </>
     );
 }
 
@@ -468,5 +543,45 @@ export function OrderRow({ item, index, last }) {
                 </View>
             </View>
         </Animated.View>
+    );
+}
+
+
+export function NewOrderPopup({ visible = false, onClose = () => { } }) {
+    return (
+        <>
+            {visible && <View style={{
+                position: "absolute", top: -150, left: 0, right: 0, bottom: 0,
+                backgroundColor: "rgba(0,0,0,0.6)",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 10,
+            }}>
+                <View style={{
+                    backgroundColor: "#1a202c",
+                    borderRadius: 28,
+                    padding: 24,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 20,
+                    width: "80%",
+                    height: 220,
+                }}>
+                    <Text style={{ color: "#fbbf24", fontSize: 18, fontWeight: "900", letterSpacing: -0.3 }}>
+                        New Delivery Assigned!
+                    </Text>
+                    <Text style={{ color: "#a5b4fc", fontSize: 13, lineHeight: 20, fontWeight: "500", textAlign: "center" }}>
+                        You have a new delivery assigned. Please check your orders list and get ready to pick it up.
+                    </Text>
+                    <TouchableOpacity
+
+                        style={{ backgroundColor: "#fbbf24", paddingVertical: 12, paddingHorizontal: 24, borderRadius: 12, alignItems: "center" }}
+                        onPress={onClose}
+                    >
+                        <Text style={{ color: "#000", fontWeight: "800", fontSize: 14 }}>View Orders</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>}
+        </>
     );
 }

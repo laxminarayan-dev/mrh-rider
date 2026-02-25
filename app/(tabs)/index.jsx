@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ScrollView,
   Text,
@@ -5,6 +6,7 @@ import {
   View,
 } from "react-native";
 import { EmptyState, OrderRow, StatCard, WelcomeCard } from "../../components/mycomponents/HomeComponents";
+import { NewOrderPopup } from "../../components/mycomponents/NewOrderPopup";
 
 const STATS = [
   {
@@ -42,6 +44,12 @@ const ORDERS = [];
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function Home() {
+  const [isOnline, setIsOnline] = useState(true); // Simulated online status
+  const [showNewOrder, setShowNewOrder] = useState(true); // Control new order popup visibility
+
+  const toggleOnlineStatus = () => {
+    setIsOnline((prev) => !prev);
+  }
 
   return (
     <ScrollView
@@ -51,9 +59,10 @@ export default function Home() {
       contentContainerStyle={{ paddingBottom: 48, paddingTop: 24 }}
     >
       {/* Welcome Hero */}
-      <WelcomeCard />
+      <WelcomeCard isOnline={isOnline} onToggleOnline={toggleOnlineStatus} />
 
       {/* New Order Popup */}
+      <NewOrderPopup visible={showNewOrder} onClose={() => setShowNewOrder(false)} />
 
       {/* Section label */}
       <View style={{ paddingHorizontal: 20, marginBottom: 14 }}>

@@ -1,14 +1,13 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import { Redirect } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import Loader from "../../components/mycomponents/Loader";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,8 +15,9 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [focusedField, setFocusedField] = useState(null);
   const [error, setError] = useState("");
-  const [redirectToHome, setRedirectToHome] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
   const scrollRef = useRef();
+  const router = useRouter();
 
   const { bottom: bottomInset } = useSafeAreaInsets();
 
@@ -46,20 +46,26 @@ export default function Login() {
 
 
   const handleLogin = async () => {
-    if (email === "lucky@mrhalwai.in" && password === "password") {
-      await AsyncStorage.setItem("userToken", email + password);
-      setRedirectToHome(true);
-    } else {
-      setError("Invalid email or password");
+    try {
+      setAuthLoading(true);
+      await AsyncStorage.setItem("userToken", "email + password");
+      router.replace("/(tabs)");
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setTimeout(() => {
+        setAuthLoading(false);
+      }, 5000);
     }
   };
 
-  if (redirectToHome) return <Redirect href="/" />;
+
 
   return (
 
     <View style={{ flex: 1, backgroundColor: "#09090b" }}>
-      <StatusBar barStyle="light-content" backgroundColor="#09090b" />
+      {authLoading && (<Loader />)}
+
       <Animated.View style={[{ flex: 1, justifyContent: "center", gap: 20 }, animatedStyle]}>
         <ScrollView
           ref={scrollRef}
