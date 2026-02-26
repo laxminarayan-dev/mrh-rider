@@ -11,7 +11,7 @@ import { NewOrderPopup } from "../../components/mycomponents/NewOrderPopup";
 const STATS = [
   {
     label: "Delivered",
-    value: "0",
+    value: "2",
     unit: "today",
     icon: "check-circle",
     iconLib: "feather",
@@ -21,7 +21,7 @@ const STATS = [
   },
   {
     label: "Pending",
-    value: "0",
+    value: "2",
     unit: "orders",
     icon: "clock",
     iconLib: "feather",
@@ -31,7 +31,7 @@ const STATS = [
   },
   {
     label: "Avg Time",
-    value: "--",
+    value: "18",
     unit: "min",
     icon: "zap",
     iconLib: "feather",
@@ -40,7 +40,34 @@ const STATS = [
     border: "#4c1d95",
   },
 ];
-const ORDERS = [];
+const ORDERS = [
+  {
+    id: "ORD-28A1F3",
+    customer: "Rahul Sharma",
+    phone: "+91 98765 43210",
+    pickup: { name: "Tandoori Bites", address: "Sector 22, Gurgaon" },
+    delivery: { address: "DLF Phase 3, Block B, Flat 402" },
+    items: 3,
+    amount: "₹485",
+    payment: "COD",
+    distance: "2.4 km",
+    status: "picking_up", // picking_up | on_the_way | arrived
+    placedAt: "2:35 PM",
+  },
+  {
+    id: "ORD-93C7D2",
+    customer: "Priya Patel",
+    phone: "+91 91234 56780",
+    pickup: { name: "Wok Express", address: "MG Road, Gurgaon" },
+    delivery: { address: "Sushant Lok 1, C Block, House 14" },
+    items: 1,
+    amount: "₹220",
+    payment: "Online",
+    distance: "3.1 km",
+    status: "on_the_way",
+    placedAt: "2:50 PM",
+  },
+];
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function Home() {

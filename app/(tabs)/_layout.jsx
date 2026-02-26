@@ -1,8 +1,14 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Tabs, useRouter } from "expo-router";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../components/mycomponents/Header";
+import current from "./current";
+import history from "./history";
+import index from "./index";
+
+const Tab = createMaterialTopTabNavigator();
 
 export default function TabsLayout() {
   const router = useRouter();
@@ -16,27 +22,53 @@ export default function TabsLayout() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#09090b" }}>
       <Header handleLogout={handleLogout} />
-      <Tabs
+      <Tab.Navigator
+        tabBarPosition="bottom"
         screenOptions={{
+          swipeEnabled: true,
           headerShown: false,
+          tabBarShowIcon: true,
+          tabBarShowLabel: true,
           tabBarStyle: {
             backgroundColor: "#1a202c",
-            borderTopColor: "#4b5563",
-            paddingTop: 10,
-            paddingBottom: 15,
-            paddingHorizontal: 15,
-            height: 74,
+            borderTopWidth: 1,
+            borderTopColor: "#374151",
+            paddingHorizontal: 10,
+            paddingTop: 4,
+            height: 68,
+            elevation: 8,
           },
           tabBarActiveTintColor: "#fbbf24",
           tabBarInactiveTintColor: "#6b7280",
+          tabBarIndicatorStyle: {
+            backgroundColor: "#fbbf24",
+            width: 0, // Hide the default indicator
+            height: 3,
+            borderRadius: 2,
+            bottom: 0,
+          },
+          tabBarIconStyle: {
+            width: 24,
+            height: 24,
+          },
           tabBarLabelStyle: {
-            fontSize: 12,
-            marginTop: 5,
+            fontSize: 14,
+            fontWeight: "800",
+            textTransform: "capitalize",
+            marginTop: 2,
+            marginBottom: 6,
+          },
+          tabBarItemStyle: {
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingVertical: 6,
           },
         }}
       >
-        <Tabs.Screen
+        <Tab.Screen
           name="index"
+          component={index}
           options={{
             title: "Home",
             tabBarIcon: ({ color, size }) => (
@@ -44,7 +76,7 @@ export default function TabsLayout() {
             ),
           }}
         />
-        <Tabs.Screen
+        <Tab.Screen
           name="current"
           options={{
             title: "Current",
@@ -52,9 +84,11 @@ export default function TabsLayout() {
               <MaterialIcons name="bolt" size={size} color={color} />
             ),
           }}
+          component={current}
         />
-        <Tabs.Screen
+        <Tab.Screen
           name="history"
+          component={history}
           options={{
             title: "History",
             tabBarIcon: ({ color, size }) => (
@@ -62,7 +96,7 @@ export default function TabsLayout() {
             ),
           }}
         />
-      </Tabs>
+      </Tab.Navigator>
     </SafeAreaView>
   );
 }
