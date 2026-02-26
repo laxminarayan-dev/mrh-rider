@@ -3,8 +3,12 @@ import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { LogBox } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { SafeAreaView } from "react-native-safe-area-context";
 import LoderWithImage from "../components/mycomponents/LoaderWithImage";
+
+LogBox.ignoreLogs(["SafeAreaView has been deprecated"]);
 
 SplashScreen.preventAutoHideAsync(); // Keep the splash screen visible while we check auth
 
@@ -32,20 +36,22 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <KeyboardProvider>
-      <StatusBar barStyle="light-content" backgroundColor="#09090b" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: "fade",
-          contentStyle: { backgroundColor: "#09090b" },
-        }}
-      />
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#09090b" }}>
+      <KeyboardProvider>
+        <StatusBar barStyle="light-content" backgroundColor="#09090b" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: "fade",
+            contentStyle: { backgroundColor: "#09090b" },
+          }}
+        />
 
-      {/* Splash overlay — sits on top until auth is resolved */}
-      {loading && (
-        <LoderWithImage />
-      )}
-    </KeyboardProvider>
+        {/* Splash overlay — sits on top until auth is resolved */}
+        {loading && (
+          <LoderWithImage />
+        )}
+      </KeyboardProvider>
+    </SafeAreaView>
   );
 }

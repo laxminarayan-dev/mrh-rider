@@ -4,8 +4,13 @@ import { useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 
-export default function Header({ handleLogout }) {
+export default function Header() {
   const router = useRouter();
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("userToken");
+    // Handle logout navigation if needed
+    router.replace("/(auth)/login");
+  };
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(anim, {

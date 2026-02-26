@@ -41,14 +41,17 @@ const DEMO_ORDERS = [
 
 const STATUS_CONFIG = {
   picking_up: { label: "Picking Up", color: "#d4a843", bg: "rgba(212,168,67,0.1)", border: "rgba(212,168,67,0.2)", icon: "package" },
+  ready: { label: "Ready", color: "#d4a843", bg: "rgba(212,168,67,0.1)", border: "rgba(212,168,67,0.2)", icon: "package" },
   on_the_way: { label: "On the Way", color: "#22c55e", bg: "rgba(34,197,94,0.1)", border: "rgba(34,197,94,0.2)", icon: "navigation" },
+  out_for_delivery: { label: "Out for Delivery", color: "#22c55e", bg: "rgba(34,197,94,0.1)", border: "rgba(34,197,94,0.2)", icon: "navigation" },
   arrived: { label: "Arrived", color: "#3b82f6", bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.2)", icon: "map-pin" },
+  delivered: { label: "Delivered", color: "#6b7280", bg: "rgba(107,114,128,0.1)", border: "rgba(107,114,128,0.2)", icon: "check-circle" },
 };
 
 // ─── Order Card ──────────────────────────────────────────────────────────────
-function OrderCard({ order, index }) {
+function OrderCard({ ordersData, index }) {
   const anim = useRef(new Animated.Value(0)).current;
-  const status = STATUS_CONFIG[order.status] || STATUS_CONFIG.picking_up;
+  const status = STATUS_CONFIG[ordersData.status] || STATUS_CONFIG.picking_up;
 
   useEffect(() => {
     Animated.spring(anim, {
@@ -61,8 +64,8 @@ function OrderCard({ order, index }) {
   }, []);
 
   const openNavigation = () => {
-    // Replace with actual coordinates from order
-    const address = encodeURIComponent(order.delivery.address);
+    // Replace with actual coordinates from ordersData
+    const address = encodeURIComponent(ordersData.delivery.address);
     const url = `google.navigation:q=${address}&mode=d`;
     Linking.openURL(url).catch(() => {
       Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${address}`);
@@ -70,7 +73,7 @@ function OrderCard({ order, index }) {
   };
 
   const callCustomer = () => {
-    Linking.openURL(`tel:${order.phone}`);
+    Linking.openURL(`tel:${ordersData.phone}`);
   };
 
   return (
@@ -105,11 +108,11 @@ function OrderCard({ order, index }) {
                 justifyContent: "center",
               }}
             >
-              <MaterialCommunityIcons name="package-variant" size={18} color="#d4a843" />
+              <MaterialCommunityIcons name={status.icon} size={18} color={status.color} />
             </View>
             <View>
-              <Text style={{ fontSize: 15, color: "#f0f0f0", fontWeight: "700" }}>{order.id}</Text>
-              <Text style={{ fontSize: 11, color: "#52525b", marginTop: 1 }}>{order.placedAt}</Text>
+              <Text style={{ fontSize: 15, color: "#f0f0f0", fontWeight: "700" }}>{ordersData.id}</Text>
+              <Text style={{ fontSize: 11, color: "#52525b", marginTop: 1 }}>{ordersData.placedAt}</Text>
             </View>
           </View>
 
@@ -144,8 +147,8 @@ function OrderCard({ order, index }) {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 10, color: "#52525b", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 }}>Pickup</Text>
-              <Text style={{ fontSize: 13, color: "#e4e4e7", fontWeight: "600" }}>{order.pickup.name}</Text>
-              <Text style={{ fontSize: 12, color: "#52525b", marginTop: 1 }}>{order.pickup.address}</Text>
+              <Text style={{ fontSize: 13, color: "#e4e4e7", fontWeight: "600" }}>{ordersData.pickup.name}</Text>
+              <Text style={{ fontSize: 12, color: "#52525b", marginTop: 1 }}>{ordersData.pickup.address}</Text>
             </View>
           </View>
 
@@ -159,7 +162,7 @@ function OrderCard({ order, index }) {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 10, color: "#52525b", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 }}>Delivery</Text>
-              <Text style={{ fontSize: 13, color: "#e4e4e7", fontWeight: "600" }}>{order.delivery.address}</Text>
+              <Text style={{ fontSize: 13, color: "#e4e4e7", fontWeight: "600" }}>{ordersData.delivery.address}</Text>
             </View>
           </View>
         </View>
@@ -171,18 +174,18 @@ function OrderCard({ order, index }) {
         <View style={{ flexDirection: "row", paddingHorizontal: 16, paddingVertical: 12, gap: 16 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
             <Feather name="user" size={12} color="#52525b" />
-            <Text style={{ fontSize: 12, color: "#a1a1aa", fontWeight: "600" }}>{order.customer}</Text>
+            <Text style={{ fontSize: 12, color: "#a1a1aa", fontWeight: "600" }}>{ordersData.customer}</Text>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
             <MaterialCommunityIcons name="map-marker-distance" size={13} color="#52525b" />
-            <Text style={{ fontSize: 12, color: "#a1a1aa", fontWeight: "600" }}>{order.distance}</Text>
+            <Text style={{ fontSize: 12, color: "#a1a1aa", fontWeight: "600" }}>{ordersData.distance}</Text>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
             <MaterialCommunityIcons name="cash" size={14} color="#52525b" />
-            <Text style={{ fontSize: 12, color: "#a1a1aa", fontWeight: "600" }}>{order.payment}</Text>
+            <Text style={{ fontSize: 12, color: "#a1a1aa", fontWeight: "600" }}>{ordersData.payment}</Text>
           </View>
           <View style={{ marginLeft: "auto" }}>
-            <Text style={{ fontSize: 14, color: "#f0f0f0", fontWeight: "800" }}>{order.amount}</Text>
+            <Text style={{ fontSize: 14, color: "#f0f0f0", fontWeight: "800" }}>{ordersData.amount}</Text>
           </View>
         </View>
 
@@ -353,8 +356,8 @@ function Current() {
         {orders.length === 0 ? (
           <EmptyCurrentOrders />
         ) : (
-          orders.map((order, i) => (
-            <OrderCard key={order.id} order={order} index={i} />
+          orders.map((ordersData, i) => (
+            <OrderCard key={ordersData.id} ordersData={ordersData} index={i} />
           ))
         )}
       </View>

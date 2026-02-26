@@ -1,3 +1,4 @@
+import getTimeDiffrence from "@/lib/getTimeDiffrence";
 import {
     Feather,
     FontAwesome5,
@@ -10,6 +11,14 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { getOrdersByStatus, getWeeklyData } from "../../lib/getOrderData";
+import getTimeAndDate from "../../lib/getTimeAndDate";
+
+const GOLD = "#d4a843";
+const GOLD_DIM = "rgba(212,168,67,0.12)";
+const GOLD_BORDER = "rgba(212,168,67,0.2)";
+const CARD_BG = "#111214";
+const BORDER = "#1e1f23";
 
 // ─── Pulse Ring component ───────────────────────────────────────────────────
 export function PulseRing({ color = "#d4a843", delay = 0 }) {
@@ -70,7 +79,6 @@ export function PulseRing({ color = "#d4a843", delay = 0 }) {
 // ─── Hero Welcome Card ───────────────────────────────────────────────────────
 export function WelcomeCard({ isOnline = false, onToggleOnline = () => { } }) {
     const anim = useRef(new Animated.Value(0)).current;
-
     const [isConfirmationModelVisible, setConfirmationModelVisible] = useState(false);
 
     useEffect(() => {
@@ -233,71 +241,26 @@ export function WelcomeCard({ isOnline = false, onToggleOnline = () => { } }) {
 }
 
 // ─── Stat Card ───────────────────────────────────────────────────────────────
-export function StatCard({ label, value, unit, icon, color, bg, border, delay }) {
-    const anim = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
-        Animated.spring(anim, {
-            toValue: 1,
-            useNativeDriver: true,
-            tension: 55,
-            friction: 8,
-            delay,
-        }).start();
-    }, []);
+export function StatCard({ ordersData }) {
+
+    const avgMinutes = 24;
+    const targetMinutes = 30;
 
     return (
-        <Animated.View
-            style={{
-                opacity: anim,
-                transform: [
-                    { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) },
-                ],
-                flex: 1,
-            }}
-        >
-            <View
-                style={{
-                    backgroundColor: "#111214",
-                    borderWidth: 1,
-                    borderColor: "#1e1f23",
-                    borderRadius: 16,
-                    padding: 16,
-                }}
-            >
-                {/* Icon */}
-                <View
-                    style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 10,
-                        backgroundColor: "rgba(212,168,67,0.08)",
-                        borderWidth: 1,
-                        borderColor: "rgba(212,168,67,0.15)",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: 12,
-                    }}
-                >
-                    <Feather name={icon} size={16} color="#d4a843" />
-                </View>
+        <View style={{ padding: 16, gap: 12 }}>
+            {/* Full width — bar chart */}
+            <WeeklyDeliveryCard
+                data={ordersData}
+                delay={0}
+            />
 
-                {/* Value */}
-                <Text style={{ fontSize: 32, fontWeight: "800", color: "#f0f0f0", letterSpacing: -0.5, lineHeight: 36 }}>
-                    {value}
-                </Text>
-                <Text style={{ fontSize: 11, fontWeight: "600", color: "#d4a843", marginTop: 2, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.8 }}>
-                    {unit}
-                </Text>
-
-                {/* Divider */}
-                <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.04)", marginBottom: 10 }} />
-
-                <Text style={{ fontSize: 10, color: "#52525b", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: "600" }}>
-                    {label}
-                </Text>
+            {/* Two half-width cards */}
+            <View style={{ flexDirection: "row", gap: 12 }}>
+                <ActiveOrdersCard data={ordersData} delay={100} />
+                <AvgTimeCard data={ordersData} minutes={avgMinutes} targetMinutes={targetMinutes} delay={160} />
             </View>
-        </Animated.View>
+        </View>
     );
 }
 
@@ -400,6 +363,23 @@ export function OrderRow({ item, index, last }) {
             delay: index * 80 + 300,
         }).start();
     }, []);
+    if (item.status === "out_for_delivery" || item.status === "assigned") {
+        return null;
+    }
+    const { date, time } = getTimeAndDate(item?.deliveredAt);
+    // Guard: ensure these are always strings before rendering
+    const safeDate = date && date !== "Invalid Date" ? date : null;
+    const safeTime = time && time !== "Invalid Date" ? String(time).toUpperCase() : null;
+    const safeAmount = item?.totalAmount != null ? String(item.totalAmount) : "—";
+    const safeCustomer = item?.user?.fullName ?? "Unknown";
+    const safeAddress = item?.deliveryAddress[0]?.formattedAddress ?? "—";
+
+    const isDelivered = item?.status === "delivered";
+    const statusLabel = isDelivered
+        ? safeDate && safeTime
+            ? `Delivered at ${safeDate} · ${safeTime}`
+            : "Delivered"
+        : "Cancelled by Customer";
 
     return (
         <Animated.View
@@ -418,6 +398,7 @@ export function OrderRow({ item, index, last }) {
                     borderBottomColor: "#1e1f23",
                 }}
             >
+                {/* Index badge */}
                 <View
                     style={{
                         width: 38,
@@ -431,26 +412,46 @@ export function OrderRow({ item, index, last }) {
                         marginRight: 14,
                     }}
                 >
-                    <Text style={{ fontSize: 11, fontWeight: "800", color: "#d4a843" }}>#{index + 1}</Text>
+                    <Text style={{ fontSize: 11, fontWeight: "800", color: "#d4a843" }}>
+                        #{index + 1}
+                    </Text>
                 </View>
 
+                {/* Customer + address */}
                 <View style={{ flex: 1 }}>
-                    <Text style={{ color: "#e4e4e7", fontWeight: "700", fontSize: 14 }}>{item.customer}</Text>
-                    <Text style={{ color: "#52525b", fontSize: 12, marginTop: 2 }}>{item.address}</Text>
+                    <Text style={{ color: "#e4e4e7", fontWeight: "700", fontSize: 14 }}>
+                        {safeCustomer}
+                    </Text>
+                    <Text style={{ color: "#52525b", fontSize: 12, marginTop: 2 }}>
+                        {safeAddress}
+                    </Text>
                 </View>
 
+                {/* Amount + status */}
                 <View style={{ alignItems: "flex-end" }}>
-                    <Text style={{ color: "#f0f0f0", fontWeight: "800", fontSize: 15 }}>{item.amount}</Text>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 3 }}>
-                        <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: "#22c55e" }} />
-                        <Text style={{ color: "#52525b", fontSize: 11 }}>{item.time}</Text>
+                    <Text style={{ color: "#f0f0f0", fontWeight: "800", fontSize: 15 }}>
+                        {safeAmount}
+                    </Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 7, marginTop: 3, justifyContent: "flex-end" }}>
+                        <View style={{
+                            width: 5,
+                            height: 5,
+                            borderRadius: 3,
+                            backgroundColor: isDelivered ? "#22c55e" : "#f87171",
+                        }} />
+                        <Text style={{
+                            color: isDelivered ? "#22c55e" : "#f87171",
+                            fontSize: 11,
+                            fontWeight: "500",
+                        }}>
+                            {statusLabel}
+                        </Text>
                     </View>
                 </View>
             </View>
         </Animated.View>
     );
 }
-
 
 export function NewOrderPopup({ visible = false, onClose = () => { } }) {
     return (
@@ -488,5 +489,231 @@ export function NewOrderPopup({ visible = false, onClose = () => { } }) {
                 </View>
             </View>}
         </>
+    );
+}
+
+/* ─── FULL WIDTH — 7-day bar chart ─── */
+export function WeeklyDeliveryCard({ data, delay = 0 }) {
+
+    const [weeklyData, setWeeklyData] = useState(getWeeklyData(data));  // deliveries per of last 7 days, with day labels and isRecent flag
+
+    useEffect(() => {
+        setWeeklyData(getWeeklyData(data))  // deliveries per of last 7 days, with day labels and isRecent flag
+    }, [data])
+
+    const anim = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+        Animated.timing(anim, { toValue: 1, duration: 400, useNativeDriver: true, delay }).start();
+    }, []);
+
+    const maxBarHeight = Math.max(...weeklyData.map(d => d.count), 1); // max count for scaling bars, at least 1 to avoid division by zero
+    const totalDeliveries = weeklyData.reduce((sum, d) => sum + d.count, 0);
+
+
+    return (
+        <Animated.View style={{ opacity: anim, transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }}>
+            <View style={{ backgroundColor: CARD_BG, borderWidth: 1, borderColor: BORDER, borderRadius: 20, padding: 20, overflow: "hidden" }}>
+
+                {/* glow */}
+                <View style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: "rgba(212,168,67,0.04)" }} pointerEvents="none" />
+
+                {/* header */}
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 6 }}>
+                    <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: GOLD_DIM, borderWidth: 1, borderColor: GOLD_BORDER, alignItems: "center", justifyContent: "center", marginRight: 10 }}>
+                        <Feather name="bar-chart-2" size={16} color={GOLD} />
+                    </View>
+                    <View>
+                        <Text style={{ fontSize: 11, color: "#52525b", textTransform: "uppercase", letterSpacing: 1.4, fontWeight: "700" }}>Last 7 Days</Text>
+                        <Text style={{ fontSize: 10, color: "#3f3f46", marginTop: 1 }}>Daily deliveries</Text>
+                    </View>
+                    <View style={{ marginLeft: "auto", alignItems: "flex-end" }}>
+                        <Text style={{ fontSize: 26, fontWeight: "800", color: "#f0f0f0", letterSpacing: -0.8, lineHeight: 28 }}>{totalDeliveries}</Text>
+                        <Text style={{ fontSize: 9, color: GOLD, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.8 }}>Total</Text>
+                    </View>
+                </View>
+
+                {/* thin divider */}
+                <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.04)", marginVertical: 16 }} />
+
+                {/* bars */}
+                <View style={{ flexDirection: "row", gap: 4, alignItems: "flex-end" }}>
+                    {weeklyData.map((data, i) => {
+                        const CONTAINER_H = 110;
+                        const fillRatio = maxBarHeight > 0 ? data.count / maxBarHeight : 0;
+                        const barH = data.count === 0 ? 0 : Math.max(fillRatio * 72, data.count > 0 ? 6 : 0);
+
+                        return data.count === 0 ? (
+                            <View key={i} style={{ height: CONTAINER_H, flex: 1, alignItems: "center", gap: 6, borderColor: "rgba(212,168,67,0.10)", borderWidth: 1, borderStyle: "dashed", borderRadius: 8, paddingTop: 6 }}>
+                                <Text style={{ fontSize: 10, fontWeight: "700", color: "#52525b" }}>0</Text>
+                                <View style={{ width: "100%", height: 72, justifyContent: "flex-end", alignItems: "center" }}>
+                                    <View style={{ width: "72%", height: 0, borderRadius: 8 }} />
+                                </View>
+                                <Text style={{ fontSize: 9, fontWeight: "700", color: "#52525b", textTransform: "uppercase", letterSpacing: 1, position: "absolute", bottom: -16 }}>{data.day}</Text>
+                            </View>
+                        ) : (
+                            <View key={i} style={{ height: CONTAINER_H, flex: 1, alignItems: "center", gap: 6, borderColor: i === weeklyData.length - 1 ? "#f97316" : "#52525b", borderWidth: 1, borderStyle: "dashed", borderRadius: 8, paddingTop: 6 }}>
+                                <Text style={{ fontSize: 10, fontWeight: "700", color: "#f0f0f0", letterSpacing: 0.4 }}>
+                                    {data.count}
+                                </Text>
+                                <View style={{ width: "100%", height: 72, justifyContent: "flex-end", alignItems: "center", bottom: -6 }}>
+                                    <View style={{
+                                        width: "76%",
+                                        height: barH,           // plain number, no animation — no native driver conflict
+                                        borderRadius: 5,
+                                        overflow: "hidden",
+                                        backgroundColor: i === weeklyData.length - 1
+                                            ? "#f97316"
+                                            : `#ffffff70`,
+                                    }} />
+
+                                </View>
+                                <Text style={{ fontSize: 9, fontWeight: "700", color: data.isRecent ? "#f97316" : "#52525b", textTransform: "uppercase", letterSpacing: 1, position: "absolute", bottom: -16 }}>
+                                    {data.day}
+                                </Text>
+                            </View>
+                        );
+                    })}
+                </View>
+
+                {/* Today tag */}
+                <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 30 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                        <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: "#f97316" }} />
+                        <Text style={{ fontSize: 9, color: "#52525b", letterSpacing: 0.8, fontWeight: "600", textTransform: "uppercase" }}>Today</Text>
+                    </View>
+                </View>
+            </View>
+        </Animated.View>
+    );
+}
+
+/* ─── HALF WIDTH — Active Orders ─── */
+export function ActiveOrdersCard({ data, delay = 100 }) {
+    const [count, setCount] = useState(0);  // count of active orders
+
+    useEffect(() => {
+        let c = getOrdersByStatus(data)?.out_for_delivery || getOrdersByStatus(data)?.ready || [];
+        setCount(c.length)
+    }, [data])
+
+
+    const anim = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+        Animated.spring(anim, { toValue: 1, useNativeDriver: true, tension: 55, friction: 8, delay }).start();
+    }, []);
+
+    // small dot indicators
+    const MAX_DOTS = 6;
+    const dots = Array.from({ length: MAX_DOTS }, (_, i) => i < count);
+
+    return (
+        <Animated.View style={[{ flex: 1 }, { opacity: anim, transform: [{ scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }, { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
+            <View style={{ backgroundColor: CARD_BG, borderWidth: 1, borderColor: BORDER, borderRadius: 20, padding: 18, minHeight: 160, overflow: "hidden" }}>
+
+                {/* glow */}
+                <View style={{ position: "absolute", bottom: -24, left: -24, width: 90, height: 90, borderRadius: 45, backgroundColor: "rgba(212,168,67,0.05)" }} pointerEvents="none" />
+
+                {/* icon */}
+                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: GOLD_DIM, borderWidth: 1, borderColor: GOLD_BORDER, alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                    <Feather name="package" size={15} color={GOLD} />
+                </View>
+
+                {/* value */}
+                <Text style={{ fontSize: 42, fontWeight: "800", color: count > 0 ? "#f0f0f0" : "#3f3f46", letterSpacing: -1.5, lineHeight: 44 }}>
+                    {count}
+                </Text>
+                <Text style={{ fontSize: 10, fontWeight: "700", color: GOLD, textTransform: "uppercase", letterSpacing: 0.9, marginTop: 2, marginBottom: 12 }}>
+                    Active
+                </Text>
+
+                {/* label */}
+                <Text style={{ fontSize: 9, color: "#52525b", textTransform: "uppercase", letterSpacing: 1.3, fontWeight: "700", marginBottom: 14 }}>
+                    Assigned Orders
+                </Text>
+
+                {/* dot indicators */}
+                <View style={{ flexDirection: "row", gap: 5, flexWrap: "wrap", marginTop: "auto" }}>
+                    {dots.map((active, i) => (
+                        <View key={i} style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: active ? GOLD : "rgba(212,168,67,0.1)", borderWidth: 1, borderColor: active ? GOLD_BORDER : "rgba(255,255,255,0.04)" }} />
+                    ))}
+                </View>
+            </View>
+        </Animated.View>
+    );
+}
+
+/* ─── HALF WIDTH — Avg Delivery Time ─── */
+export function AvgTimeCard({ data, targetMinutes = 30, delay = 160 }) {
+
+    const [avgMinutes, setAvgMinutes] = useState(0);
+
+    useEffect(() => {
+        let deliveredOrders = getOrdersByStatus(data)?.delivered || [];
+        if (deliveredOrders.length > 0) {
+            const totalMinutes = Math.round(deliveredOrders.reduce((sum, order) => sum + getTimeDiffrence({ end: order?.deliveredAt || "2026-02-23T04:21:57.000Z", start: order?.assignedAt || "2026-02-23T04:07:38.000Z" }), 0));
+            setAvgMinutes(totalMinutes / deliveredOrders.length);
+        }
+    }, [data])
+
+
+    const anim = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+        Animated.spring(anim, { toValue: 1, useNativeDriver: true, tension: 55, friction: 8, delay }).start();
+    }, []);
+
+    const arcAnim = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+        Animated.timing(arcAnim, { toValue: 1, duration: 900, useNativeDriver: false, delay: delay + 200 }).start();
+    }, []);
+
+    const isGood = avgMinutes <= targetMinutes;
+    const ratio = Math.min(avgMinutes / (targetMinutes * 1.5), 1);
+    const progressWidth = arcAnim.interpolate({ inputRange: [0, 1], outputRange: ["0%", `${ratio * 100}%`] });
+
+    const display = avgMinutes >= 60
+        ? `${Math.floor(avgMinutes / 60)}h ${avgMinutes % 60}min`
+        : `${avgMinutes.toFixed(2)}`;
+    const unit = avgMinutes >= 60 ? "" : "min";
+
+    return (
+        <Animated.View style={[{ flex: 1 }, { opacity: anim, transform: [{ scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }, { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
+            <View style={{ backgroundColor: CARD_BG, borderWidth: 1, borderColor: BORDER, borderRadius: 20, padding: 18, minHeight: 160, overflow: "hidden" }}>
+
+                {/* glow */}
+                <View style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: 40, backgroundColor: "rgba(212,168,67,0.05)" }} pointerEvents="none" />
+
+                {/* icon */}
+                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: GOLD_DIM, borderWidth: 1, borderColor: GOLD_BORDER, alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                    <Feather name="clock" size={15} color={GOLD} />
+                </View>
+
+                {/* value */}
+                <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 3 }}>
+                    <Text style={{ fontSize: 42, fontWeight: "800", color: "#f0f0f0", letterSpacing: -1.5, lineHeight: 44 }}>
+                        {display}
+                    </Text>
+                    {unit ? <Text style={{ fontSize: 10, fontWeight: "700", color: GOLD, textTransform: "uppercase", letterSpacing: 0.9, marginBottom: 6 }}>{unit}</Text> : null}
+                </View>
+
+                {/* label */}
+                <Text style={{ fontSize: 9, color: "#52525b", textTransform: "uppercase", letterSpacing: 1.3, fontWeight: "700", marginTop: 2, marginBottom: 14 }}>
+                    Avg Delivery
+                </Text>
+
+                {/* progress bar vs target */}
+                <View style={{ marginTop: "auto" }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 5 }}>
+                        <Text style={{ fontSize: 8, color: "#3f3f46", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.8 }}>vs target</Text>
+                        <Text style={{ fontSize: 8, color: isGood ? "#4ade80" : "#f87171", fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.8 }}>
+                            {isGood ? `${targetMinutes - avgMinutes}m under` : `${avgMinutes - targetMinutes}m over`}
+                        </Text>
+                    </View>
+                    <View style={{ height: 4, backgroundColor: "rgba(255,255,255,0.05)", borderRadius: 2, overflow: "hidden" }}>
+                        <Animated.View style={{ height: "100%", width: progressWidth, borderRadius: 2, backgroundColor: isGood ? "rgba(74,222,128,0.6)" : "rgba(248,113,113,0.6)" }} />
+                    </View>
+                    <Text style={{ fontSize: 8, color: "#3f3f46", marginTop: 4, fontWeight: "600" }}>Target: {targetMinutes} min</Text>
+                </View>
+            </View>
+        </Animated.View>
     );
 }

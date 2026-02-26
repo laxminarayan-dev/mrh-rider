@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   ScrollView,
@@ -8,10 +9,11 @@ import {
 import { EmptyState, OrderRow, StatCard, WelcomeCard } from "../../components/mycomponents/HomeComponents";
 import { NewOrderPopup } from "../../components/mycomponents/NewOrderPopup";
 
-const STATS = [
-  {
+
+const STATS = {
+  delivered: {
     label: "Delivered",
-    value: "2",
+    value: "-",
     unit: "today",
     icon: "check-circle",
     iconLib: "feather",
@@ -19,9 +21,9 @@ const STATS = [
     bg: "#052e16",
     border: "#166534",
   },
-  {
+  pending: {
     label: "Pending",
-    value: "2",
+    value: "-",
     unit: "orders",
     icon: "clock",
     iconLib: "feather",
@@ -29,9 +31,9 @@ const STATS = [
     bg: "#1c1003",
     border: "#854d0e",
   },
-  {
+  avgTime: {
     label: "Avg Time",
-    value: "18",
+    value: "-",
     unit: "min",
     icon: "zap",
     iconLib: "feather",
@@ -39,43 +41,14 @@ const STATS = [
     bg: "#1a202c",
     border: "#4c1d95",
   },
-];
-const ORDERS = [
-  {
-    id: "ORD-28A1F3",
-    customer: "Rahul Sharma",
-    phone: "+91 98765 43210",
-    pickup: { name: "Tandoori Bites", address: "Sector 22, Gurgaon" },
-    delivery: { address: "DLF Phase 3, Block B, Flat 402" },
-    items: 3,
-    amount: "₹485",
-    payment: "COD",
-    distance: "2.4 km",
-    status: "picking_up", // picking_up | on_the_way | arrived
-    placedAt: "2:35 PM",
-  },
-  {
-    id: "ORD-93C7D2",
-    customer: "Priya Patel",
-    phone: "+91 91234 56780",
-    pickup: { name: "Wok Express", address: "MG Road, Gurgaon" },
-    delivery: { address: "Sushant Lok 1, C Block, House 14" },
-    items: 1,
-    amount: "₹220",
-    payment: "Online",
-    distance: "3.1 km",
-    status: "on_the_way",
-    placedAt: "2:50 PM",
-  },
-];
+};
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
-export default function Home() {
-  const [isOnline, setIsOnline] = useState(true); // Simulated online status
-  const [showNewOrder, setShowNewOrder] = useState(true); // Control new order popup visibility
+export default function Home({ isOnline, ordersData }) {
+  const [showNewOrder, setShowNewOrder] = useState(false); // Control new order popup visibility
 
   const toggleOnlineStatus = () => {
-    setIsOnline((prev) => !prev);
+    // setIsOnline((prev) => !prev);
   }
 
   return (
@@ -104,17 +77,7 @@ export default function Home() {
       {/* Stats Rows */}
       {/* First Card - Full Width */}
       <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
-        <StatCard {...STATS[0]} delay={0} />
-      </View>
-
-      {/* Second and Third Cards - Half Width Each */}
-      <View style={{ flexDirection: "row", gap: 12, paddingHorizontal: 20, marginBottom: 32 }}>
-        <View style={{ flex: 1 }}>
-          <StatCard {...STATS[1]} delay={100} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <StatCard {...STATS[2]} delay={200} />
-        </View>
+        <StatCard ordersData={ordersData} />
       </View>
 
       {/* Section label */}
@@ -126,8 +89,8 @@ export default function Home() {
               Recent Orders
             </Text>
           </View>
-          {ORDERS.length > 0 && (
-            <TouchableOpacity>
+          {ordersData.length > 0 && (
+            <TouchableOpacity onPress={() => router.push("/history")} style={{ padding: 4 }}>
               <Text style={{ color: "#fbbf24", fontSize: 12, fontWeight: "700" }}>See all →</Text>
             </TouchableOpacity>
           )}
@@ -136,7 +99,7 @@ export default function Home() {
 
       {/* Orders list / empty state */}
       <View style={{ paddingHorizontal: 20 }}>
-        {ORDERS.length === 0 ? (
+        {ordersData.length === 0 ? (
           <EmptyState />
         ) : (
           <View
@@ -148,8 +111,8 @@ export default function Home() {
               overflow: "hidden",
             }}
           >
-            {ORDERS.map((o, i) => (
-              <OrderRow key={o.id} item={o} index={i} last={i === ORDERS.length - 1} />
+            {ordersData.slice(-5).reverse().map((o, i) => (
+              <OrderRow key={o._id} item={o} index={i} last={i === ordersData.length - 1} />
             ))}
           </View>
         )}

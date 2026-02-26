@@ -1,0 +1,228 @@
+[
+  {
+    "_id": "699b311259a59882ad271591",
+    "orderItems": [
+      {
+        "_id": "698c296868ed01cf4214bcb3",
+        "name": "Pav Bhaji",
+        "price": 60,
+        "quantity": 2
+      }
+    ],
+    "totalAmount": 156,
+    "deliveryAddress": [
+      {
+        "coordinates": [
+          28.207967872825883,
+          78.25577664332235
+        ],
+        "formattedAddress": "Dibai, Debai, Bulandshahr, Uttar Pradesh, 202393, India"
+      }
+    ],
+    "paymentMethod": "Cash On Delivery",
+    "status": "delivered",
+    "createdAt": "2026-02-22T16:38:42.599Z",
+    "assignedAt": "2026-02-22T16:41:57.000Z",
+    "deliveredAt": "2026-02-22T17:14:23.000Z",
+    "shop": {
+      "_id": "699876b80688b2631d106e95",
+      "name": "Debai Secondory Outlet",
+      "shopLocation": {
+        "type": "Point",
+        "formattedAddress": "NH509, Dibai, Debai, Bulandshahr, Uttar Pradesh, 202393, India",
+        "coordinates": [
+          78.25346229897221,
+          28.20750271637643
+        ]
+      }
+    },
+    "user": {
+      "_id": "6985dfa5e52958802de253de",
+      "fullName": "Lucky Jaiswal",
+      "phone": "8864821395"
+    }
+  },
+  {
+    "_id": "699bc96d59a59882ad2719b4",
+    "orderItems": [
+      {
+        "_id": "698c296868ed01cf4214bcb3",
+        "name": "Pav Bhaji",
+        "price": 60,
+        "quantity": 1
+      },
+      {
+        "_id": "698c296868ed01cf4214bcac",
+        "name": "Plain Dosa",
+        "price": 49,
+        "quantity": 1
+      }
+    ],
+    "totalAmount": 145,
+    "deliveryAddress": [
+      {
+        "coordinates": [
+          28.207967872825883,
+          78.25577664332235
+        ],
+        "formattedAddress": "Dibai, Debai, Bulandshahr, Uttar Pradesh, 202393, India"
+      }
+    ],
+    "paymentMethod": "Cash On Delivery",
+    "status": "delivered",
+    "createdAt": "2026-02-23T03:28:45.593Z",
+    "assignedAt": "2026-02-23T03:32:10.000Z",
+    "deliveredAt": "2026-02-23T04:07:38.000Z",
+    "shop": {
+      "_id": "699876b80688b2631d106e95",
+      "name": "Debai Secondory Outlet",
+      "shopLocation": {
+        "type": "Point",
+        "formattedAddress": "NH509, Dibai, Debai, Bulandshahr, Uttar Pradesh, 202393, India",
+        "coordinates": [
+          78.25346229897221,
+          28.20750271637643
+        ]
+      }
+    },
+    "user": {
+      "_id": "6985dfa5e52958802de253de",
+      "fullName": "Lucky Jaiswal",
+      "phone": "8864821395"
+    }
+  },
+  {
+    "_id": "699d4a774ada1a5564fd1130",
+    "orderItems": [
+      {
+        "_id": "698c296868ed01cf4214bcb3",
+        "name": "Pav Bhaji",
+        "price": 70,
+        "quantity": 1
+      }
+    ],
+    "totalAmount": 106,
+    "deliveryAddress": [
+      {
+        "coordinates": [
+          28.198347328093405,
+          78.38415742873286
+        ],
+        "formattedAddress": "227K, Karm Dharm, Narora, Bulandshahr"
+      }
+    ],
+    "paymentMethod": "Cash On Delivery",
+    "status": "delivered",
+    "createdAt": "2026-02-24T06:51:35.544Z",
+    "assignedAt": "2026-02-24T06:55:02.000Z",
+    "deliveredAt": "2026-02-24T07:29:47.000Z",
+    "shop": {
+      "_id": "699871d067114223edf13420",
+      "name": "Narora Outlet",
+      "shopLocation": {
+        "type": "Point",
+        "formattedAddress": "NAPS Colony Road, Atomic Township, Narora, Debai, Bulandshahr, Uttar Pradesh, 202389, India",
+        "coordinates": [
+          78.37483341321945,
+          28.20410772174519
+        ]
+      }
+    },
+    "user": {
+      "_id": "6985dfa5e52958802de253de",
+      "fullName": "Lucky Jaiswal",
+      "phone": "8864821395"
+    }
+  },
+  {
+    "_id": "699d4ae14ada1a5564fd11f1",
+    "orderItems": [
+      {
+        "_id": "698c296868ed01cf4214bcb3",
+        "name": "Pav Bhaji",
+        "price": 70,
+        "quantity": 1
+      }
+    ],
+    "totalAmount": 106,
+    "deliveryAddress": [
+      {
+        "formattedAddress": "227K, Karm Dharm, Narora, Bulandshahr",
+        "coordinates": [
+          28.198347328093405,
+          78.38415742873286
+        ]
+      }
+    ],
+    "paymentMethod": "Cash On Delivery",
+    "status": "out_for_delivery",
+    "createdAt": "2026-02-27T06:53:21.636Z",
+    "assignedAt": "2026-02-27T06:57:44.000Z",
+    "shop": {
+      "_id": "699871d067114223edf13420",
+      "name": "Narora Outlet",
+      "shopLocation": {
+        "type": "Point",
+        "formattedAddress": "NAPS Colony Road, Atomic Township, Narora, Debai, Bulandshahr, Uttar Pradesh, 202389, India",
+        "coordinates": [
+          78.37483341321945,
+          28.20410772174519
+        ]
+      }
+    },
+    "user": {
+      "_id": "6985dfa5e52958802de253de",
+      "fullName": "Lucky Jaiswal",
+      "phone": "8864821395"
+    }
+  },
+  {
+    "_id": "699dc4504ada1a5564fd12fa",
+    "orderItems": [
+      {
+        "_id": "698c296868ed01cf4214bcb3",
+        "name": "Pav Bhaji",
+        "price": 70,
+        "quantity": 1
+      },
+      {
+        "_id": "698c296868ed01cf4214bcac",
+        "name": "Plain Dosa",
+        "price": 49,
+        "quantity": 1
+      }
+    ],
+    "totalAmount": 155,
+    "deliveryAddress": [
+      {
+        "formattedAddress": "227K, Karm Dharm, Narora, Bulandshahr",
+        "coordinates": [
+          28.198347328093405,
+          78.38415742873286
+        ]
+      }
+    ],
+    "paymentMethod": "Cash On Delivery",
+    "status": "delivered",
+    "createdAt": "2026-02-24T15:31:28.562Z",
+    "assignedAt": "2026-02-24T15:34:53.000Z",
+    "deliveredAt": "2026-02-24T16:13:15.000Z",
+    "shop": {
+      "_id": "699871d067114223edf13420",
+      "name": "Narora Outlet",
+      "shopLocation": {
+        "type": "Point",
+        "formattedAddress": "NAPS Colony Road, Atomic Township, Narora, Debai, Bulandshahr, Uttar Pradesh, 202389, India",
+        "coordinates": [
+          78.37483341321945,
+          28.20410772174519
+        ]
+      }
+    },
+    "user": {
+      "_id": "6985dfa5e52958802de253de",
+      "fullName": "Lucky Jaiswal",
+      "phone": "8864821395"
+    }
+  }
+]

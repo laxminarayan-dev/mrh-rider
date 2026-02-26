@@ -1,27 +1,27 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useEffect, useState } from "react";
 import Header from "../../components/mycomponents/Header";
-import current from "./current";
-import history from "./history";
-import index from "./index";
+import ordersData from "../../constants/test.orders.json";
+import Current from "./current";
+import History from "./history";
+import Home from "./index";
+
+
 
 const Tab = createMaterialTopTabNavigator();
 
 export default function TabsLayout() {
-  const router = useRouter();
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem("userToken");
-    // Handle logout navigation if needed
-    console.log("logout");
-    router.replace("/(auth)/login");
-  };
+  const [isOnline, setIsOnline] = useState(false); // Simulated online status
+
+  useEffect(() => {
+    console.clear();
+  }, [])
+
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#09090b" }}>
-      <Header handleLogout={handleLogout} />
+    <>
+      <Header />
       <Tab.Navigator
         tabBarPosition="bottom"
         screenOptions={{
@@ -66,16 +66,21 @@ export default function TabsLayout() {
           },
         }}
       >
+
+        {/* home page */}
         <Tab.Screen
           name="index"
-          component={index}
           options={{
             title: "Home",
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="home" size={size} color={color} />
             ),
           }}
-        />
+        >
+          {() => <Home isOnline={isOnline} ordersData={ordersData} />}
+        </Tab.Screen>
+
+        {/* current orders tab screen */}
         <Tab.Screen
           name="current"
           options={{
@@ -84,19 +89,27 @@ export default function TabsLayout() {
               <MaterialIcons name="bolt" size={size} color={color} />
             ),
           }}
-          component={current}
-        />
+        >
+
+          {() => <Current isOnline={isOnline} ordersData={ordersData} />}
+
+        </Tab.Screen>
+
+        {/* history tab screen */}
         <Tab.Screen
           name="history"
-          component={history}
           options={{
             title: "History",
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="history" size={size} color={color} />
             ),
           }}
-        />
+        >
+
+          {() => <History ordersData={ordersData} />}
+
+        </Tab.Screen>
       </Tab.Navigator>
-    </SafeAreaView>
+    </>
   );
 }
