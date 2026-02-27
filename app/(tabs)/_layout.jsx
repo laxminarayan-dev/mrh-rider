@@ -19,8 +19,7 @@ export default function TabsLayout() {
 
   useEffect(() => {
     console.clear();
-  }, [])
-
+  }, []);
 
   return (
     <>
@@ -36,9 +35,9 @@ export default function TabsLayout() {
             backgroundColor: "#1a201d",
             borderTopWidth: 1,
             borderTopColor: "#374151",
-            paddingHorizontal: normalize(10),
-            paddingTop: normalize(4),
-            height: normalize(68),
+            paddingHorizontal: 10,
+            paddingTop: 4,
+            height: 68,
             elevation: 8,
           },
           tabBarActiveTintColor: "#fbbf24",
@@ -46,37 +45,36 @@ export default function TabsLayout() {
           tabBarIndicatorStyle: {
             backgroundColor: "#fbbf24",
             width: 0, // Hide the default indicator
-            height: normalize(3),
-            borderRadius: normalize(2),
+            height: 3,
+            borderRadius: 2,
             bottom: 0,
           },
           tabBarIconStyle: {
-            width: normalize(24),
-            height: normalize(24),
+            width: 24,
+            height: 24,
           },
           tabBarLabelStyle: {
-            fontSize: normalize(14),
+            fontSize: 14,
             fontWeight: "800",
             textTransform: "capitalize",
-            marginTop: normalize(2),
-            marginBottom: normalize(6),
+            marginTop: 2,
+            marginBottom: 6,
           },
           tabBarItemStyle: {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            paddingVertical: normalize(6),
+            paddingVertical: 6,
           },
         }}
       >
-
         {/* home page */}
         <Tab.Screen
           name="index"
           options={{
             title: "Home",
             tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="home" size={normalize(size)} color={color} />
+              <MaterialIcons name="home" size={24} color={color} />
             ),
           }}
         >
@@ -89,13 +87,11 @@ export default function TabsLayout() {
           options={{
             title: "Current",
             tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="bolt" size={normalize(size)} color={color} />
+              <MaterialIcons name="bolt" size={24} color={color} />
             ),
           }}
         >
-
           {() => <Current isOnline={isOnline} ordersData={ordersData} />}
-
         </Tab.Screen>
 
         {/* history tab screen */}
@@ -104,13 +100,11 @@ export default function TabsLayout() {
           options={{
             title: "History",
             tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="history" size={normalize(size)} color={color} />
+              <MaterialIcons name="history" size={24} color={color} />
             ),
           }}
         >
-
           {() => <History ordersData={ordersData} />}
-
         </Tab.Screen>
       </Tab.Navigator>
     </>
