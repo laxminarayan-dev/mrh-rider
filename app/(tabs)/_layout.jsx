@@ -10,6 +10,10 @@ import Home from "./index";
 
 const Tab = createMaterialTopTabNavigator();
 
+console.log("normalize:", normalize);
+console.log("createMaterialTopTabNavigator:", createMaterialTopTabNavigator);
+console.log("MaterialIcons:", MaterialIcons);
+
 export default function TabsLayout() {
   const [isOnline, setIsOnline] = useState(false); // Simulated online status
 

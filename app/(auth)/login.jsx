@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Loader from "../../components/mycomponents/Loader";
 
@@ -22,9 +22,7 @@ export default function Login() {
   const { bottom: bottomInset } = useSafeAreaInsets();
 
   const keyboardHeight = useSharedValue(0);
-  const scrollToBottom = () => {
-    scrollRef.current?.scrollToEnd({ animated: true });
-  };
+
 
   useKeyboardHandler({
     onMove: (e) => {
@@ -34,9 +32,16 @@ export default function Login() {
     onEnd: (e) => {
       "worklet";
       keyboardHeight.value = e.height;
-      runOnJS(scrollToBottom)();
     },
   });
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 50);
+
+    return () => clearTimeout(timeout);
+  }, [keyboardHeight.value]);
 
   const animatedStyle = useAnimatedStyle(() => ({
 
