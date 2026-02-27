@@ -3,11 +3,10 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { useEffect, useState } from "react";
 import Header from "../../components/mycomponents/Header";
 import ordersData from "../../constants/test.orders.json";
+import { normalize } from "../../lib/normalize";
 import Current from "./current";
 import History from "./history";
 import Home from "./index";
-
-
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -30,12 +29,12 @@ export default function TabsLayout() {
           tabBarShowIcon: true,
           tabBarShowLabel: true,
           tabBarStyle: {
-            backgroundColor: "#1a202c",
+            backgroundColor: "#1a201d",
             borderTopWidth: 1,
             borderTopColor: "#374151",
-            paddingHorizontal: 10,
-            paddingTop: 4,
-            height: 68,
+            paddingHorizontal: normalize(10),
+            paddingTop: normalize(4),
+            height: normalize(68),
             elevation: 8,
           },
           tabBarActiveTintColor: "#fbbf24",
@@ -43,26 +42,26 @@ export default function TabsLayout() {
           tabBarIndicatorStyle: {
             backgroundColor: "#fbbf24",
             width: 0, // Hide the default indicator
-            height: 3,
-            borderRadius: 2,
+            height: normalize(3),
+            borderRadius: normalize(2),
             bottom: 0,
           },
           tabBarIconStyle: {
-            width: 24,
-            height: 24,
+            width: normalize(24),
+            height: normalize(24),
           },
           tabBarLabelStyle: {
-            fontSize: 14,
+            fontSize: normalize(14),
             fontWeight: "800",
             textTransform: "capitalize",
-            marginTop: 2,
-            marginBottom: 6,
+            marginTop: normalize(2),
+            marginBottom: normalize(6),
           },
           tabBarItemStyle: {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            paddingVertical: 6,
+            paddingVertical: normalize(6),
           },
         }}
       >
@@ -73,7 +72,7 @@ export default function TabsLayout() {
           options={{
             title: "Home",
             tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="home" size={size} color={color} />
+              <MaterialIcons name="home" size={normalize(size)} color={color} />
             ),
           }}
         >
@@ -86,7 +85,7 @@ export default function TabsLayout() {
           options={{
             title: "Current",
             tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="bolt" size={size} color={color} />
+              <MaterialIcons name="bolt" size={normalize(size)} color={color} />
             ),
           }}
         >
@@ -101,7 +100,7 @@ export default function TabsLayout() {
           options={{
             title: "History",
             tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="history" size={size} color={color} />
+              <MaterialIcons name="history" size={normalize(size)} color={color} />
             ),
           }}
         >

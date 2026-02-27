@@ -10,7 +10,7 @@ import LoderWithImage from "../components/mycomponents/LoaderWithImage";
 
 LogBox.ignoreLogs(["SafeAreaView has been deprecated"]);
 
-SplashScreen.preventAutoHideAsync(); // Keep the splash screen visible while we check auth
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loading, setLoading] = useState(true);
@@ -47,10 +47,7 @@ export default function RootLayout() {
           }}
         />
 
-        {/* Splash overlay — sits on top until auth is resolved */}
-        {loading && (
-          <LoderWithImage />
-        )}
+        {loading && <LoderWithImage />}
       </KeyboardProvider>
     </SafeAreaView>
   );

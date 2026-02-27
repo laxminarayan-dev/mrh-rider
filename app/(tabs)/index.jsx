@@ -9,43 +9,9 @@ import {
 import { EmptyState, OrderRow, StatCard, WelcomeCard } from "../../components/mycomponents/HomeComponents";
 import { NewOrderPopup } from "../../components/mycomponents/NewOrderPopup";
 
-
-const STATS = {
-  delivered: {
-    label: "Delivered",
-    value: "-",
-    unit: "today",
-    icon: "check-circle",
-    iconLib: "feather",
-    color: "#22c55e",
-    bg: "#052e16",
-    border: "#166534",
-  },
-  pending: {
-    label: "Pending",
-    value: "-",
-    unit: "orders",
-    icon: "clock",
-    iconLib: "feather",
-    color: "#f59e0b",
-    bg: "#1c1003",
-    border: "#854d0e",
-  },
-  avgTime: {
-    label: "Avg Time",
-    value: "-",
-    unit: "min",
-    icon: "zap",
-    iconLib: "feather",
-    color: "#a78bfa",
-    bg: "#1a202c",
-    border: "#4c1d95",
-  },
-};
-
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function Home({ isOnline, ordersData }) {
-  const [showNewOrder, setShowNewOrder] = useState(false); // Control new order popup visibility
+  const [showNewOrder, setShowNewOrder] = useState(true); // Control new order popup visibility
 
   const toggleOnlineStatus = () => {
     // setIsOnline((prev) => !prev);

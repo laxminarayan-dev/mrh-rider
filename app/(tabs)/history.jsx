@@ -7,20 +7,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-
-
 import { EmptyHistory, HistoryCard } from "../../components/mycomponents/HistoryComponents";
-
-// ─── Demo data (replace with real API data) ──────────────────────────────────
-
-const STATUS_CONFIG = {
-  delivered: { label: "Delivered", color: "#22c55e", bg: "rgba(34,197,94,0.1)", border: "rgba(34,197,94,0.2)", icon: "check-circle" },
-  out_for_delivery: { label: "Out for Delivery", color: "#f59e0b", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.2)", icon: "truck" },
-  picking_up: { label: "Picking Up", color: "#3b82f6", bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.2)", icon: "package" },
-  cancelled: { label: "Cancelled", color: "#ef4444", bg: "rgba(239,68,68,0.1)", border: "rgba(239,68,68,0.2)", icon: "x-circle" },
-};
-
-
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 function History({ ordersData }) {
