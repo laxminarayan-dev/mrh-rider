@@ -8,9 +8,11 @@ import {
   View
 } from "react-native";
 import { EmptyHistory, HistoryCard } from "../../components/mycomponents/HistoryComponents";
+import { useAppContext } from "../../lib/AppContext";
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
-function History({ ordersData }) {
+function History() {
+  const { ordersData } = useAppContext();
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("all"); // all | delivered | cancelled
 

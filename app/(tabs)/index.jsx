@@ -8,9 +8,11 @@ import {
 } from "react-native";
 import { EmptyState, OrderRow, StatCard, WelcomeCard } from "../../components/mycomponents/HomeComponents";
 import { NewOrderPopup } from "../../components/mycomponents/NewOrderPopup";
+import { useAppContext } from "../../lib/AppContext";
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
-export default function Home({ isOnline, ordersData }) {
+export default function Home() {
+  const { isOnline, ordersData } = useAppContext();
   const [showNewOrder, setShowNewOrder] = useState(true); // Control new order popup visibility
 
   const toggleOnlineStatus = () => {

@@ -1,36 +1,15 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { useEffect, useState } from "react";
+import { Tabs } from "expo-router";
 import Header from "../../components/mycomponents/Header";
-import ordersData from "../../constants/test.orders.json";
-import { normalize } from "../../lib/normalize";
-import Current from "./current";
-import History from "./history";
-import Home from "./index";
-
-const Tab = createMaterialTopTabNavigator();
-
-console.log("normalize:", normalize);
-console.log("createMaterialTopTabNavigator:", createMaterialTopTabNavigator);
-console.log("MaterialIcons:", MaterialIcons);
+import { AppProvider } from "../../lib/AppContext";
 
 export default function TabsLayout() {
-  const [isOnline, setIsOnline] = useState(false); // Simulated online status
-
-  useEffect(() => {
-    console.clear();
-  }, []);
-
   return (
-    <>
+    <AppProvider>
       <Header />
-      <Tab.Navigator
-        tabBarPosition="bottom"
+      <Tabs
         screenOptions={{
-          swipeEnabled: true,
           headerShown: false,
-          tabBarShowIcon: true,
-          tabBarShowLabel: true,
           tabBarStyle: {
             backgroundColor: "#1a201d",
             borderTopWidth: 1,
@@ -42,23 +21,16 @@ export default function TabsLayout() {
           },
           tabBarActiveTintColor: "#fbbf24",
           tabBarInactiveTintColor: "#6b7280",
-          tabBarIndicatorStyle: {
-            backgroundColor: "#fbbf24",
-            width: 0, // Hide the default indicator
-            height: 3,
-            borderRadius: 2,
-            bottom: 0,
-          },
-          tabBarIconStyle: {
-            width: 24,
-            height: 24,
-          },
           tabBarLabelStyle: {
             fontSize: 14,
             fontWeight: "800",
             textTransform: "capitalize",
             marginTop: 2,
             marginBottom: 6,
+          },
+          tabBarIconStyle: {
+            width: 24,
+            height: 24,
           },
           tabBarItemStyle: {
             flexDirection: "column",
@@ -68,45 +40,34 @@ export default function TabsLayout() {
           },
         }}
       >
-        {/* home page */}
-        <Tab.Screen
+        <Tabs.Screen
           name="index"
           options={{
             title: "Home",
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <MaterialIcons name="home" size={24} color={color} />
             ),
           }}
-        >
-          {() => <Home isOnline={isOnline} ordersData={ordersData} />}
-        </Tab.Screen>
-
-        {/* current orders tab screen */}
-        <Tab.Screen
+        />
+        <Tabs.Screen
           name="current"
           options={{
             title: "Current",
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <MaterialIcons name="bolt" size={24} color={color} />
             ),
           }}
-        >
-          {() => <Current isOnline={isOnline} ordersData={ordersData} />}
-        </Tab.Screen>
-
-        {/* history tab screen */}
-        <Tab.Screen
+        />
+        <Tabs.Screen
           name="history"
           options={{
             title: "History",
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <MaterialIcons name="history" size={24} color={color} />
             ),
           }}
-        >
-          {() => <History ordersData={ordersData} />}
-        </Tab.Screen>
-      </Tab.Navigator>
-    </>
+        />
+      </Tabs>
+    </AppProvider>
   );
 }
