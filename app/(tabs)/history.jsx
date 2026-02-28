@@ -9,69 +9,184 @@ import {
 } from "react-native";
 import { EmptyHistory, HistoryCard } from "../../components/mycomponents/HistoryComponents";
 import { useAppContext } from "../../lib/AppContext";
+import { normalize } from "../../lib/normalize";
 
-// ─── Main Screen ─────────────────────────────────────────────────────────────
 function History() {
   const { ordersData } = useAppContext();
   const [orders, setOrders] = useState([]);
-  const [filter, setFilter] = useState("all"); // all | delivered | cancelled
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    setOrders(ordersData.filter((o) => (o.status === "delivered" || o.status === "cancelled")));
+    setOrders(
+      ordersData.filter(
+        (o) => o.status === "delivered" || o.status === "cancelled"
+      )
+    );
   }, [ordersData]);
 
-  const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
+  const filtered =
+    filter === "all" ? orders : orders.filter((o) => o.status === filter);
 
-  // Group by date
-  const grouped = devideOrdersByDate(filtered);
+  const grouped = devideOrdersByDate(filtered) || {};
 
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: "#09090b" }}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 48, paddingTop: 24 }}
+      contentContainerStyle={{
+        paddingBottom: normalize(48),
+        paddingTop: normalize(24),
+      }}
     >
       {/* Header */}
-      <View style={{ paddingHorizontal: 20, marginBottom: 18 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          <View style={{ width: 3, height: 16, borderRadius: 2, backgroundColor: "#d4a843" }} />
-          <Text style={{ fontSize: 20, color: "#f0f0f0", fontWeight: "800", letterSpacing: -0.3 }}>
+      <View
+        style={{
+          paddingHorizontal: normalize(20),
+          marginBottom: normalize(18),
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: normalize(8),
+          }}
+        >
+          <View
+            style={{
+              width: normalize(3),
+              height: normalize(16),
+              borderRadius: normalize(2),
+              backgroundColor: "#d4a843",
+            }}
+          />
+          <Text
+            style={{
+              fontSize: normalize(20),
+              color: "#f0f0f0",
+              fontWeight: "800",
+              letterSpacing: normalize(-0.3),
+            }}
+          >
             Order History
           </Text>
         </View>
       </View>
 
       {/* Summary card */}
-      <View style={{ paddingHorizontal: 20, marginBottom: 18 }}>
+      <View
+        style={{
+          paddingHorizontal: normalize(20),
+          marginBottom: normalize(18),
+        }}
+      >
         <View
           style={{
             backgroundColor: "#111214",
-            borderWidth: 1,
+            borderWidth: normalize(1),
             borderColor: "#1e1f23",
-            borderRadius: 16,
-            padding: 16,
+            borderRadius: normalize(16),
+            padding: normalize(16),
             flexDirection: "row",
           }}
         >
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={{ fontSize: 10, color: "#52525b", fontWeight: "600", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Total Orders</Text>
-            <Text style={{ fontSize: 22, color: "#f0f0f0", fontWeight: "800" }}>{orders.length}</Text>
+            <Text
+              style={{
+                fontSize: normalize(10),
+                color: "#52525b",
+                fontWeight: "600",
+                textTransform: "uppercase",
+                letterSpacing: normalize(1),
+                marginBottom: normalize(4),
+              }}
+            >
+              Total Orders
+            </Text>
+            <Text
+              style={{
+                fontSize: normalize(22),
+                color: "#f0f0f0",
+                fontWeight: "800",
+              }}
+            >
+              {orders.length}
+            </Text>
           </View>
-          <View style={{ width: 1, backgroundColor: "#1e1f23" }} />
+
+          <View
+            style={{
+              width: normalize(1),
+              backgroundColor: "#1e1f23",
+            }}
+          />
+
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={{ fontSize: 10, color: "#52525b", fontWeight: "600", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Delivered</Text>
-            <Text style={{ fontSize: 22, color: "#22c55e", fontWeight: "800" }}>{orders.filter((o) => o.status === "delivered").length}</Text>
+            <Text
+              style={{
+                fontSize: normalize(10),
+                color: "#52525b",
+                fontWeight: "600",
+                textTransform: "uppercase",
+                letterSpacing: normalize(1),
+                marginBottom: normalize(4),
+              }}
+            >
+              Delivered
+            </Text>
+            <Text
+              style={{
+                fontSize: normalize(22),
+                color: "#22c55e",
+                fontWeight: "800",
+              }}
+            >
+              {orders.filter((o) => o.status === "delivered").length}
+            </Text>
           </View>
-          <View style={{ width: 1, backgroundColor: "#1e1f23" }} />
+
+          <View
+            style={{
+              width: normalize(1),
+              backgroundColor: "#1e1f23",
+            }}
+          />
+
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={{ fontSize: 10, color: "#52525b", fontWeight: "600", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Cancelled</Text>
-            <Text style={{ fontSize: 22, color: "#ef4444", fontWeight: "800" }}>{orders.filter((o) => o.status === "cancelled").length}</Text>
+            <Text
+              style={{
+                fontSize: normalize(10),
+                color: "#52525b",
+                fontWeight: "600",
+                textTransform: "uppercase",
+                letterSpacing: normalize(1),
+                marginBottom: normalize(4),
+              }}
+            >
+              Cancelled
+            </Text>
+            <Text
+              style={{
+                fontSize: normalize(22),
+                color: "#ef4444",
+                fontWeight: "800",
+              }}
+            >
+              {orders.filter((o) => o.status === "cancelled").length}
+            </Text>
           </View>
         </View>
       </View>
 
       {/* Filter tabs */}
-      <View style={{ flexDirection: "row", paddingHorizontal: 20, marginBottom: 18, gap: 8 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          paddingHorizontal: normalize(20),
+          marginBottom: normalize(18),
+          gap: normalize(8),
+        }}
+      >
         {[
           { key: "all", label: "All" },
           { key: "delivered", label: "Delivered" },
@@ -82,19 +197,22 @@ function History() {
             activeOpacity={0.7}
             onPress={() => setFilter(tab.key)}
             style={{
-              paddingHorizontal: 14,
-              paddingVertical: 7,
-              borderRadius: 10,
-              backgroundColor: filter === tab.key ? "#d4a843" : "#1e1f23",
-              borderWidth: 1,
-              borderColor: filter === tab.key ? "#d4a843" : "#2a2b30",
+              paddingHorizontal: normalize(14),
+              paddingVertical: normalize(7),
+              borderRadius: normalize(10),
+              backgroundColor:
+                filter === tab.key ? "#d4a843" : "#1e1f23",
+              borderWidth: normalize(1),
+              borderColor:
+                filter === tab.key ? "#d4a843" : "#2a2b30",
             }}
           >
             <Text
               style={{
-                fontSize: 12,
+                fontSize: normalize(12),
                 fontWeight: "700",
-                color: filter === tab.key ? "#111214" : "#71717a",
+                color:
+                  filter === tab.key ? "#111214" : "#71717a",
               }}
             >
               {tab.label}
@@ -104,26 +222,60 @@ function History() {
       </View>
 
       {/* Orders grouped by date */}
-      <View style={{ paddingHorizontal: 20 }}>
+      <View style={{ paddingHorizontal: normalize(20) }}>
         {filtered.length === 0 ? (
           <EmptyHistory />
         ) : (
-          Object.entries(grouped).reverse().map(([date, dateOrders], index) => (
-            <View key={date + "-" + index} style={{ marginBottom: 20 }}>
-              {/* Date label */}
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                <Feather name="calendar" size={12} color="#52525b" />
-                <Text style={{ fontSize: 11, color: "#52525b", fontWeight: "700", textTransform: "uppercase", letterSpacing: 1.5 }}>
-                  {date}
-                </Text>
-                <View style={{ flex: 1, height: 1, backgroundColor: "#1e1f23" }} />
-              </View>
+          Object.entries(grouped)
+            .reverse()
+            .map(([date, dateOrders], index) => (
+              <View
+                key={date + "-" + index}
+                style={{ marginBottom: normalize(20) }}
+              >
+                {/* Date label */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: normalize(8),
+                    marginBottom: normalize(12),
+                  }}
+                >
+                  <Feather
+                    name="calendar"
+                    size={normalize(12)}
+                    color="#52525b"
+                  />
+                  <Text
+                    style={{
+                      fontSize: normalize(11),
+                      color: "#52525b",
+                      fontWeight: "700",
+                      textTransform: "uppercase",
+                      letterSpacing: normalize(1.5),
+                    }}
+                  >
+                    {date}
+                  </Text>
+                  <View
+                    style={{
+                      flex: 1,
+                      height: normalize(1),
+                      backgroundColor: "#1e1f23",
+                    }}
+                  />
+                </View>
 
-              {dateOrders.map((order, i) => (
-                <HistoryCard key={order._id} order={order} index={i} />
-              ))}
-            </View>
-          ))
+                {dateOrders.map((order, i) => (
+                  <HistoryCard
+                    key={order._id}
+                    order={order}
+                    index={i}
+                  />
+                ))}
+              </View>
+            ))
         )}
       </View>
     </ScrollView>

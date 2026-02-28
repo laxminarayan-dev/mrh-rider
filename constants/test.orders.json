@@ -69,7 +69,7 @@
       }
     ],
     "paymentMethod": "Cash On Delivery",
-    "status": "delivered",
+    "status": "out_for_delivery",
     "createdAt": "2026-02-23T03:28:45.593Z",
     "assignedAt": "2026-02-23T03:32:10.000Z",
     "deliveredAt": "2026-02-23T04:07:38.000Z",
