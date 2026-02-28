@@ -1,35 +1,28 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   Linking,
+  Pressable,
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import { useLocationStatus } from "../../components/mycomponents/CurrentComponent/useLocationStatus";
+import openGoogleMaps from "../../components/mycomponents/OpenGoogleMap";
+import hasArrived, { getDistanceMeters } from "../../lib/hasArived";
+import { normalize } from "../../lib/normalize";
 
-// ─── Demo data (replace with real data from socket/API) ──────────────────────
+// ─── Demo data ────────────────────────────────────────────────────────────────
 const DEMO_ORDERS = [
-  {
-    id: "ORD-28A1F3",
-    customer: "Rahul Sharma",
-    phone: "+91 98765 43210",
-    pickup: { name: "Tandoori Bites", address: "Sector 22, Gurgaon" },
-    delivery: { address: "DLF Phase 3, Block B, Flat 402" },
-    items: 3,
-    amount: "₹485",
-    payment: "COD",
-    distance: "2.4 km",
-    status: "picking_up", // picking_up | on_the_way | arrived
-    placedAt: "2:35 PM",
-  },
   {
     id: "ORD-93C7D2",
     customer: "Priya Patel",
     phone: "+91 91234 56780",
-    pickup: { name: "Wok Express", address: "MG Road, Gurgaon" },
-    delivery: { address: "Sushant Lok 1, C Block, House 14" },
+    pickup: { name: "Wok Express", address: "MG Road, Gurgaon", lat: 28.4595, lng: 77.0266 },
+    delivery: { address: "Sushant Lok 1, C Block, House 14", lat: 28.4677, lng: 77.0714 },
     items: 1,
     amount: "₹220",
     payment: "Online",
@@ -37,163 +30,260 @@ const DEMO_ORDERS = [
     status: "on_the_way",
     placedAt: "2:50 PM",
   },
+  {
+    id: "ORD-28A1F3",
+    customer: "Rahul Sharma",
+    phone: "+91 98765 43210",
+    pickup: { name: "Tandoori Bites", address: "Sector 22, Gurgaon", lat: 28.4595, lng: 77.0266 },
+    delivery: { address: "DLF Phase 3, Block B, Flat 402", lat: 28.4945, lng: 77.0935 },
+    items: 3,
+    amount: "₹485",
+    payment: "COD",
+    distance: "2.4 km",
+    status: "picking_up",
+    placedAt: "2:35 PM",
+  },
+
 ];
 
 const STATUS_CONFIG = {
-  picking_up: { label: "Picking Up", color: "#d4a843", bg: "rgba(212,168,67,0.1)", border: "rgba(212,168,67,0.2)", icon: "package" },
-  ready: { label: "Ready", color: "#d4a843", bg: "rgba(212,168,67,0.1)", border: "rgba(212,168,67,0.2)", icon: "package" },
-  on_the_way: { label: "On the Way", color: "#22c55e", bg: "rgba(34,197,94,0.1)", border: "rgba(34,197,94,0.2)", icon: "navigation" },
-  out_for_delivery: { label: "Out for Delivery", color: "#22c55e", bg: "rgba(34,197,94,0.1)", border: "rgba(34,197,94,0.2)", icon: "navigation" },
-  arrived: { label: "Arrived", color: "#3b82f6", bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.2)", icon: "map-pin" },
-  delivered: { label: "Delivered", color: "#6b7280", bg: "rgba(107,114,128,0.1)", border: "rgba(107,114,128,0.2)", icon: "check-circle" },
+  picking_up: { label: "Picking Up", color: "#f59e0b", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.25)", icon: "package", dot: "#f59e0b" },
+  ready: { label: "Ready", color: "#f59e0b", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.25)", icon: "package", dot: "#f59e0b" },
+  on_the_way: { label: "On the Way", color: "#22c55e", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.25)", icon: "navigation", dot: "#22c55e" },
+  out_for_delivery: { label: "Out for Delivery", color: "#22c55e", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.25)", icon: "navigation", dot: "#22c55e" },
+  arrived: { label: "Arrived", color: "#60a5fa", bg: "rgba(96,165,250,0.12)", border: "rgba(96,165,250,0.25)", icon: "map-pin", dot: "#60a5fa" },
+  delivered: { label: "Delivered", color: "#6b7280", bg: "rgba(107,114,128,0.12)", border: "rgba(107,114,128,0.25)", icon: "check-circle", dot: "#6b7280" },
 };
 
+// ─── Pill Badge ───────────────────────────────────────────────────────────────
+function StatusBadge({ status }) {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.picking_up;
+  const pulse = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (status === "on_the_way" || status === "out_for_delivery") {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulse, { toValue: 1.5, duration: 800, useNativeDriver: true }),
+          Animated.timing(pulse, { toValue: 1, duration: 800, useNativeDriver: true }),
+        ])
+      ).start();
+    }
+  }, [status]);
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: normalize(5),
+        backgroundColor: cfg.bg,
+        borderWidth: 1,
+        borderColor: cfg.border,
+        borderRadius: normalize(20),
+        paddingHorizontal: normalize(10),
+        paddingVertical: normalize(5),
+      }}
+    >
+      <Animated.View
+        style={{
+          width: normalize(6),
+          height: normalize(6),
+          borderRadius: normalize(3),
+          backgroundColor: cfg.dot,
+          transform: [{ scale: pulse }],
+        }}
+      />
+      <Text style={{ color: cfg.color, fontSize: normalize(11), fontWeight: "700", letterSpacing: 0.3 }}>
+        {cfg.label}
+      </Text>
+    </View>
+  );
+}
+
+// ─── Info Chip ────────────────────────────────────────────────────────────────
+function InfoChip({ iconLib, icon, label, iconSize = 12 }) {
+  const Icon = iconLib === "mci" ? MaterialCommunityIcons : Feather;
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: normalize(4) }}>
+      <Icon name={icon} size={normalize(iconSize)} color="#3f3f46" />
+      <Text style={{ fontSize: normalize(12), color: "#71717a", fontWeight: "600" }}>{label}</Text>
+    </View>
+  );
+}
+
+// ─── Divider ──────────────────────────────────────────────────────────────────
+const Divider = () => (
+  <View style={{ height: 1, backgroundColor: "#18181b", marginHorizontal: normalize(16) }} />
+);
+
 // ─── Order Card ──────────────────────────────────────────────────────────────
-function OrderCard({ ordersData, index }) {
+function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) {
   const anim = useRef(new Animated.Value(0)).current;
-  const status = STATUS_CONFIG[ordersData.status] || STATUS_CONFIG.picking_up;
+  const cfg = STATUS_CONFIG[ordersData.status] || STATUS_CONFIG.picking_up;
+  const isActive = index === 0;
 
   useEffect(() => {
     Animated.spring(anim, {
       toValue: 1,
       useNativeDriver: true,
-      tension: 55,
-      friction: 9,
-      delay: index * 120,
+      tension: 60,
+      friction: 10,
+      delay: index * 100,
     }).start();
   }, []);
-
-  const openNavigation = () => {
-    // Replace with actual coordinates from ordersData
-    const address = encodeURIComponent(ordersData.delivery.address);
-    const url = `google.navigation:q=${address}&mode=d`;
-    Linking.openURL(url).catch(() => {
-      Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${address}`);
-    });
-  };
-
-  const callCustomer = () => {
-    Linking.openURL(`tel:${ordersData.phone}`);
-  };
+  const callCustomer = () => Linking.openURL(`tel:${ordersData.phone}`);
 
   return (
     <Animated.View
       style={{
         opacity: anim,
-        transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }],
-        marginBottom: 14,
+        transform: [
+          { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [normalize(24), 0] }) },
+          { scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.97, 1] }) },
+        ],
+        opacity: isActive ? 1 : 0.4,
+        pointerEvents: isActive ? "auto" : "none",
+        marginBottom: normalize(14),
       }}
     >
       <View
         style={{
           backgroundColor: "#111214",
           borderWidth: 1,
-          borderColor: "#1e1f23",
-          borderRadius: 18,
+          borderColor: "#202024",
+          borderRadius: normalize(20),
           overflow: "hidden",
+          borderLeftWidth: normalize(3),
+          borderLeftColor: cfg.color,
         }}
       >
         {/* Header */}
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: normalize(16),
+            paddingTop: normalize(14),
+            paddingBottom: normalize(12),
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: normalize(10) }}>
             <View
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 12,
-                backgroundColor: "rgba(212,168,67,0.08)",
+                width: normalize(38),
+                height: normalize(38),
+                borderRadius: normalize(12),
+                backgroundColor: `${cfg.color}14`,
                 borderWidth: 1,
-                borderColor: "rgba(212,168,67,0.15)",
+                borderColor: `${cfg.color}30`,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <MaterialCommunityIcons name={status.icon} size={18} color={status.color} />
+              <MaterialCommunityIcons name={cfg.icon} size={normalize(19)} color={cfg.color} />
             </View>
             <View>
-              <Text style={{ fontSize: 15, color: "#f0f0f0", fontWeight: "700" }}>{ordersData.id}</Text>
-              <Text style={{ fontSize: 11, color: "#52525b", marginTop: 1 }}>{ordersData.placedAt}</Text>
+              <Text style={{ fontSize: normalize(14), color: "#f4f4f5", fontWeight: "800", letterSpacing: 0.2 }}>
+                {ordersData.id}
+              </Text>
+              <Text style={{ fontSize: normalize(11), color: "#3f3f46", marginTop: normalize(2) }}>
+                Placed at {ordersData.placedAt}
+              </Text>
+            </View>
+          </View>
+          <StatusBadge status={ordersData.status} />
+        </View>
+
+        <Divider />
+
+        {/* Route */}
+        <View style={{ paddingHorizontal: normalize(16), paddingVertical: normalize(14) }}>
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: normalize(12) }}>
+            <View style={{ alignItems: "center", width: normalize(20) }}>
+              <View
+                style={{
+                  width: normalize(20),
+                  height: normalize(20),
+                  borderRadius: normalize(10),
+                  backgroundColor: "rgba(34,197,94,0.12)",
+                  borderWidth: 1.5,
+                  borderColor: "#22c55e",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <View style={{ width: normalize(7), height: normalize(7), borderRadius: normalize(4), backgroundColor: "#22c55e" }} />
+              </View>
+              <View style={{ width: 1.5, height: normalize(24), backgroundColor: "#27272a", marginTop: normalize(3) }} />
+            </View>
+            <View style={{ flex: 1, paddingBottom: normalize(12) }}>
+              <Text style={{ fontSize: normalize(10), color: "#3f3f46", fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: normalize(3) }}>
+                Pickup
+              </Text>
+              <Text style={{ fontSize: normalize(13), color: "#e4e4e7", fontWeight: "700" }}>{ordersData.pickup.name}</Text>
+              <Text style={{ fontSize: normalize(12), color: "#52525b", marginTop: normalize(2) }}>{ordersData.pickup.address}</Text>
             </View>
           </View>
 
-          {/* Status badge */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 5,
-              backgroundColor: status.bg,
-              borderWidth: 1,
-              borderColor: status.border,
-              borderRadius: 20,
-              paddingHorizontal: 10,
-              paddingVertical: 5,
-            }}
-          >
-            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: status.color }} />
-            <Text style={{ color: status.color, fontSize: 11, fontWeight: "600" }}>{status.label}</Text>
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: normalize(12) }}>
+            <View style={{ width: normalize(20), alignItems: "center" }}>
+              <View
+                style={{
+                  width: normalize(20),
+                  height: normalize(20),
+                  borderRadius: normalize(10),
+                  backgroundColor: "rgba(239,68,68,0.12)",
+                  borderWidth: 1.5,
+                  borderColor: "#ef4444",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <View style={{ width: normalize(7), height: normalize(7), borderRadius: normalize(4), backgroundColor: "#ef4444" }} />
+              </View>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: normalize(10), color: "#3f3f46", fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: normalize(3) }}>
+                Delivery
+              </Text>
+              <Text style={{ fontSize: normalize(13), color: "#e4e4e7", fontWeight: "700" }}>{ordersData.delivery.address}</Text>
+            </View>
           </View>
         </View>
 
-        {/* Divider */}
-        <View style={{ height: 1, backgroundColor: "#1e1f23", marginHorizontal: 16 }} />
+        <Divider />
 
-        {/* Locations */}
-        <View style={{ paddingHorizontal: 16, paddingVertical: 14, gap: 12 }}>
-          {/* Pickup */}
-          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-            <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: "rgba(34,197,94,0.1)", borderWidth: 1, borderColor: "rgba(34,197,94,0.2)", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#22c55e" }} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 10, color: "#52525b", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 }}>Pickup</Text>
-              <Text style={{ fontSize: 13, color: "#e4e4e7", fontWeight: "600" }}>{ordersData.pickup.name}</Text>
-              <Text style={{ fontSize: 12, color: "#52525b", marginTop: 1 }}>{ordersData.pickup.address}</Text>
-            </View>
-          </View>
-
-          {/* Connector line */}
-          <View style={{ marginLeft: 11, width: 1, height: 8, backgroundColor: "#1e1f23" }} />
-
-          {/* Delivery */}
-          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-            <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: "rgba(239,68,68,0.1)", borderWidth: 1, borderColor: "rgba(239,68,68,0.2)", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#ef4444" }} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 10, color: "#52525b", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 }}>Delivery</Text>
-              <Text style={{ fontSize: 13, color: "#e4e4e7", fontWeight: "600" }}>{ordersData.delivery.address}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Divider */}
-        <View style={{ height: 1, backgroundColor: "#1e1f23", marginHorizontal: 16 }} />
-
-        {/* Info row */}
-        <View style={{ flexDirection: "row", paddingHorizontal: 16, paddingVertical: 12, gap: 16 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <Feather name="user" size={12} color="#52525b" />
-            <Text style={{ fontSize: 12, color: "#a1a1aa", fontWeight: "600" }}>{ordersData.customer}</Text>
-          </View>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <MaterialCommunityIcons name="map-marker-distance" size={13} color="#52525b" />
-            <Text style={{ fontSize: 12, color: "#a1a1aa", fontWeight: "600" }}>{ordersData.distance}</Text>
-          </View>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <MaterialCommunityIcons name="cash" size={14} color="#52525b" />
-            <Text style={{ fontSize: 12, color: "#a1a1aa", fontWeight: "600" }}>{ordersData.payment}</Text>
-          </View>
+        {/* Meta */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: normalize(16),
+            paddingVertical: normalize(11),
+            gap: normalize(14),
+          }}
+        >
+          <InfoChip iconLib="feather" icon="user" label={ordersData.customer} iconSize={12} />
+          <InfoChip iconLib="mci" icon="map-marker-distance" label={ordersData.distance} iconSize={13} />
+          <InfoChip iconLib="mci" icon="cash" label={ordersData.payment} iconSize={14} />
           <View style={{ marginLeft: "auto" }}>
-            <Text style={{ fontSize: 14, color: "#f0f0f0", fontWeight: "800" }}>{ordersData.amount}</Text>
+            <Text style={{ fontSize: normalize(15), color: "#f4f4f5", fontWeight: "800" }}>{ordersData.amount}</Text>
           </View>
         </View>
 
-        {/* Divider */}
-        <View style={{ height: 1, backgroundColor: "#1e1f23", marginHorizontal: 16 }} />
+        <Divider />
 
-        {/* Action buttons */}
-        <View style={{ flexDirection: "row", paddingHorizontal: 16, paddingVertical: 12, gap: 10 }}>
+        {/* Actions */}
+        <View
+          style={{
+            flexDirection: "row",
+            paddingHorizontal: normalize(14),
+            paddingVertical: normalize(12),
+            gap: normalize(10),
+          }}
+        >
           <TouchableOpacity
             onPress={callCustomer}
             activeOpacity={0.7}
@@ -202,35 +292,57 @@ function OrderCard({ ordersData, index }) {
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
-              gap: 6,
-              backgroundColor: "#1e1f23",
-              borderRadius: 12,
-              paddingVertical: 10,
+              gap: normalize(6),
+              backgroundColor: "#1c1c1f",
+              borderRadius: normalize(12),
+              paddingVertical: normalize(11),
               borderWidth: 1,
-              borderColor: "#2a2b30",
+              borderColor: "#27272a",
             }}
           >
-            <Feather name="phone" size={14} color="#a1a1aa" />
-            <Text style={{ color: "#a1a1aa", fontSize: 13, fontWeight: "600" }}>Call</Text>
+            <Feather name="phone" size={normalize(14)} color="#71717a" />
+            <Text style={{ color: "#a1a1aa", fontSize: normalize(13), fontWeight: "700" }}>Call</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={openNavigation}
-            activeOpacity={0.7}
-            style={{
-              flex: 2,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              backgroundColor: "#d4a843",
-              borderRadius: 12,
-              paddingVertical: 10,
-            }}
-          >
-            <Feather name="navigation" size={14} color="#111214" />
-            <Text style={{ color: "#111214", fontSize: 13, fontWeight: "800" }}>Navigate</Text>
-          </TouchableOpacity>
+          {hasArrivedToCurrent ?
+
+            <TouchableOpacity
+              onPress={() => handleDelivered(ordersData.id)}
+              activeOpacity={0.75}
+              style={{
+                flex: 2.2,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: normalize(7),
+                backgroundColor: cfg.color,
+                borderRadius: normalize(12),
+                paddingVertical: normalize(11),
+              }}
+            >
+              <Feather name="navigation" size={normalize(14)} color="#0a0a0b" />
+              <Text style={{ color: "#0a0a0b", fontSize: normalize(13), fontWeight: "800", letterSpacing: 0.2 }}>Mark As Delivered</Text>
+            </TouchableOpacity>
+            : <TouchableOpacity
+              onPress={() => openGoogleMaps(
+                { lat: ordersData.pickup.lat, lng: ordersData.pickup.lng },
+                { lat: ordersData.delivery.lat, lng: ordersData.delivery.lng }
+              )}
+              activeOpacity={0.75}
+              style={{
+                flex: 2.2,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: normalize(7),
+                backgroundColor: cfg.color,
+                borderRadius: normalize(12),
+                paddingVertical: normalize(11),
+              }}
+            >
+              <Feather name="navigation" size={normalize(14)} color="#0a0a0b" />
+              <Text style={{ color: "#0a0a0b", fontSize: normalize(13), fontWeight: "800", letterSpacing: 0.2 }}>Navigate</Text>
+            </TouchableOpacity>}
         </View>
       </View>
     </Animated.View>
@@ -243,18 +355,11 @@ function EmptyCurrentOrders() {
   const float = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.spring(anim, {
-      toValue: 1,
-      useNativeDriver: true,
-      tension: 45,
-      friction: 8,
-      delay: 200,
-    }).start();
-
+    Animated.spring(anim, { toValue: 1, useNativeDriver: true, tension: 45, friction: 8, delay: 200 }).start();
     Animated.loop(
       Animated.sequence([
-        Animated.timing(float, { toValue: 1, duration: 2500, useNativeDriver: true }),
-        Animated.timing(float, { toValue: 0, duration: 2500, useNativeDriver: true }),
+        Animated.timing(float, { toValue: 1, duration: 2600, useNativeDriver: true }),
+        Animated.timing(float, { toValue: 0, duration: 2600, useNativeDriver: true }),
       ])
     ).start();
   }, []);
@@ -263,106 +368,267 @@ function EmptyCurrentOrders() {
     <Animated.View
       style={{
         opacity: anim,
-        transform: [{ scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.92, 1] }) }],
-        marginTop: 40,
+        transform: [{ scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.93, 1] }) }],
+        marginTop: normalize(40),
       }}
     >
       <View
         style={{
           backgroundColor: "#111214",
           borderWidth: 1,
-          borderColor: "#1e1f23",
-          borderRadius: 20,
-          paddingVertical: 56,
-          paddingHorizontal: 32,
+          borderColor: "#202024",
+          borderRadius: normalize(22),
+          paddingVertical: normalize(60),
+          paddingHorizontal: normalize(32),
           alignItems: "center",
         }}
       >
         <Animated.View
           style={{
-            transform: [{ translateY: float.interpolate({ inputRange: [0, 1], outputRange: [0, -6] }) }],
-            marginBottom: 22,
+            transform: [{ translateY: float.interpolate({ inputRange: [0, 1], outputRange: [0, normalize(-8)] }) }],
+            marginBottom: normalize(24),
           }}
         >
           <View
             style={{
-              width: 72,
-              height: 72,
-              borderRadius: 22,
-              backgroundColor: "rgba(212,168,67,0.08)",
+              width: normalize(76),
+              height: normalize(76),
+              borderRadius: normalize(24),
+              backgroundColor: "rgba(245,158,11,0.08)",
               borderWidth: 1,
-              borderColor: "rgba(212,168,67,0.15)",
+              borderColor: "rgba(245,158,11,0.18)",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Feather name="inbox" size={32} color="#d4a843" />
+            <Feather name="inbox" size={normalize(33)} color="#f59e0b" />
           </View>
         </Animated.View>
 
-        <Text style={{ fontSize: 17, fontWeight: "800", color: "#f0f0f0", textAlign: "center", marginBottom: 8 }}>
+        <Text style={{ fontSize: normalize(18), fontWeight: "800", color: "#f4f4f5", textAlign: "center", marginBottom: normalize(8), letterSpacing: -0.3 }}>
           No Active Orders
         </Text>
-        <Text style={{ fontSize: 13, color: "#52525b", textAlign: "center", lineHeight: 20, fontWeight: "500", maxWidth: 240 }}>
-          When you accept a delivery, it will show up here with full details and navigation.
+        <Text
+          style={{
+            fontSize: normalize(13),
+            color: "#3f3f46",
+            textAlign: "center",
+            lineHeight: normalize(20),
+            fontWeight: "500",
+            maxWidth: normalize(240),
+          }}
+        >
+          When you accept a delivery, it will appear here with full details and navigation.
         </Text>
-
-        <View style={{ marginTop: 24, width: 40, height: 3, borderRadius: 2, backgroundColor: "rgba(212,168,67,0.25)" }} />
+        <View style={{ marginTop: normalize(26), width: normalize(36), height: normalize(3), borderRadius: normalize(2), backgroundColor: "rgba(245,158,11,0.3)" }} />
       </View>
     </Animated.View>
   );
 }
 
+
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 function Current() {
-  const [orders] = useState(DEMO_ORDERS); // Replace with real state
+  const [orders, setOrders] = useState(DEMO_ORDERS);
+  const [sortedOrders, setSortedOrders] = useState([]);
+  const [currentOrder, setCurrentOrder] = useState(null);
+  const [hasArrivedToCurrent, setHasArrivedToCurrent] = useState(false);
+  const hasSortedRef = useRef(false);
+
+  // const locationReady = useLocationGuard();
+  const { status: locationStatus, currentLocation } = useLocationStatus();
+
+  useEffect(() => {
+    if (!currentLocation || orders.length === 0) {
+      setCurrentOrder(null);
+      return;
+    }
+
+    let nearest = null;
+    let minDistance = Infinity;
+
+    orders.forEach(order => {
+      const dist = getDistanceMeters(currentLocation, {
+        lat: order.delivery.lat,
+        lng: order.delivery.lng,
+      });
+
+      if (dist < minDistance) {
+        minDistance = dist;
+        nearest = order;
+      }
+    });
+
+
+    setCurrentOrder(nearest);
+
+
+  }, [currentLocation, orders]);
+
+
+  useEffect(() => {
+    if (!currentLocation || orders.length === 0) return;
+
+    if (hasSortedRef.current) return; // already sorted once
+
+    const sorted = [...orders].sort((a, b) => {
+      const distA = getDistanceMeters(currentLocation, a.delivery);
+      const distB = getDistanceMeters(currentLocation, b.delivery);
+      return distA - distB;
+    });
+
+    setSortedOrders(sorted);
+
+    hasSortedRef.current = true; // lock it
+
+  }, [currentLocation, orders]);
+
+  useEffect(() => {
+    const isArrived = hasArrived(currentLocation, { lat: currentOrder?.delivery.lat, lng: currentOrder?.delivery.lng });
+    setHasArrivedToCurrent(isArrived);
+  }, [currentLocation, currentOrder]);
+
+  const handleDelivered = (id) => {
+    const updated = orders.filter(o => o.id !== id);
+    setOrders(updated);
+
+    hasSortedRef.current = false; // unlock sorting
+  };
+
+  if (locationStatus === "checking") {
+    return null;
+  } if (locationStatus === "no-permission") {
+    return (
+      <View style={styles.guardContainer}>
+        <Text style={styles.guardText}>
+          Location permission is required to start ride.
+        </Text>
+
+        <Pressable
+          onPress={() => Location.requestForegroundPermissionsAsync()}
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Grant Permission</Text>
+        </Pressable>
+      </View>
+    );
+  } if (locationStatus === "gps-off") {
+    return (
+      <View style={styles.guardContainer}>
+        <Text style={styles.guardText}>
+          Please turn on GPS (Location Services).
+        </Text>
+
+        <Pressable
+          onPress={() =>
+            Linking.sendIntent("android.settings.LOCATION_SOURCE_SETTINGS")
+          }
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Turn On GPS</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
+
     <ScrollView
       style={{ flex: 1, backgroundColor: "#09090b" }}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 48, paddingTop: 24 }}
+      contentContainerStyle={{ paddingBottom: normalize(100), paddingTop: normalize(24) }}
     >
       {/* Header */}
-      <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
+      <View style={{ paddingHorizontal: normalize(20), marginBottom: normalize(20) }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <View style={{ width: 3, height: 16, borderRadius: 2, backgroundColor: "#d4a843" }} />
-            <Text style={{ fontSize: 20, color: "#f0f0f0", fontWeight: "800", letterSpacing: -0.3 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: normalize(10) }}>
+            <View
+              style={{
+                width: normalize(4),
+                height: normalize(20),
+                borderRadius: normalize(2),
+                backgroundColor: "#f59e0b",
+              }}
+            />
+            <Text style={{ fontSize: normalize(21), color: "#f4f4f5", fontWeight: "800", letterSpacing: -0.5 }}>
               Current Orders
             </Text>
           </View>
-          {orders.length > 0 && (
+
+          {sortedOrders.length > 0 && (
             <View
               style={{
-                backgroundColor: "rgba(212,168,67,0.1)",
+                backgroundColor: "rgba(245,158,11,0.1)",
                 borderWidth: 1,
-                borderColor: "rgba(212,168,67,0.2)",
-                borderRadius: 20,
-                paddingHorizontal: 10,
-                paddingVertical: 4,
+                borderColor: "rgba(245,158,11,0.22)",
+                borderRadius: normalize(20),
+                paddingHorizontal: normalize(12),
+                paddingVertical: normalize(5),
+                flexDirection: "row",
+                alignItems: "center",
+                gap: normalize(5),
               }}
             >
-              <Text style={{ fontSize: 12, color: "#d4a843", fontWeight: "700" }}>
-                {orders.length} active
+              <View style={{ width: normalize(6), height: normalize(6), borderRadius: normalize(3), backgroundColor: "#f59e0b" }} />
+              <Text style={{ fontSize: normalize(12), color: "#f59e0b", fontWeight: "700" }}>
+                {sortedOrders.length} active
               </Text>
             </View>
           )}
         </View>
       </View>
 
-      {/* Orders */}
-      <View style={{ paddingHorizontal: 20 }}>
+      {/* Cards */}
+      <View style={{ paddingHorizontal: normalize(16) }}>
         {orders.length === 0 ? (
           <EmptyCurrentOrders />
+        ) : sortedOrders.length == 0 ? (
+          <View style={{ marginTop: normalize(40), alignItems: "center", flexDirection: "column", alignItems: "center", gap: normalize(100) }}>
+            <Text style={{ color: "#71717a", fontSize: normalize(13), textAlign: "center", marginTop: normalize(40) }}>
+              Sorting orders based on your location...
+            </Text>
+            <ActivityIndicator size="large" color="#f59e0b" />
+          </View>
         ) : (
-          orders.map((ordersData, i) => (
-            <OrderCard key={ordersData.id} ordersData={ordersData} index={i} />
-          ))
+          (
+            sortedOrders.map((o, i) => <OrderCard
+              key={o.id}
+              ordersData={o}
+              index={i}
+              hasArrivedToCurrent={hasArrivedToCurrent}
+              handleDelivered={handleDelivered} />)
+          )
         )}
       </View>
     </ScrollView>
+
   );
 }
 
+
 export default Current;
+
+
+const styles = {
+  guardContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#111",
+  },
+  guardText: {
+    color: "white",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  button: {
+    backgroundColor: "#f59e0b",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  buttonText: {
+    fontWeight: "700",
+    color: "#000",
+  },
+};

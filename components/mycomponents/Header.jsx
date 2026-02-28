@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
+import { normalize } from "../../lib/normalize";
 
 export default function Header() {
   const router = useRouter();
@@ -38,21 +39,22 @@ export default function Header() {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          paddingHorizontal: 24,
-          paddingTop: 12,
-          paddingBottom: 16,
+          paddingHorizontal: normalize(24),
+          paddingTop: normalize(12),
+          paddingBottom: normalize(16),
           backgroundColor: "#09090b",
           borderBottomWidth: 1,
           borderBottomColor: "#1a202c",
+          height: normalize(80),
         }}
       >
         {/* Brand */}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: normalize(12) }}>
           <View
             style={{
-              width: 46,
-              height: 46,
-              borderRadius: 14,
+              width: normalize(46),
+              height: normalize(46),
+              borderRadius: normalize(14),
               backgroundColor: "#1a202c",
               borderWidth: 1.5,
               borderColor: "#fbbf24",
@@ -62,17 +64,17 @@ export default function Header() {
           >
             <Image
               source={require("../../assets/myImages/bicycle.png")}
-              style={{ width: 24, height: 24 }}
+              style={{ width: normalize(24), height: normalize(24) }}
               contentFit="contain"
             />
           </View>
           <View>
             <Text
               style={{
-                fontSize: 10,
+                fontSize: normalize(10),
                 color: "#fbbf24",
                 fontWeight: "800",
-                letterSpacing: 3,
+                letterSpacing: normalize(3),
                 textTransform: "uppercase",
               }}
             >
@@ -80,7 +82,7 @@ export default function Header() {
             </Text>
             <Text
               style={{
-                fontSize: 18,
+                fontSize: normalize(18),
                 color: "#fff",
                 fontWeight: "900",
                 letterSpacing: -0.5,
@@ -97,17 +99,17 @@ export default function Header() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            gap: 6,
+            gap: normalize(6),
             backgroundColor: "#1a202c",
             borderWidth: 1,
             borderColor: "#fbbf24",
-            paddingHorizontal: 14,
-            paddingVertical: 8,
-            borderRadius: 12,
+            paddingHorizontal: normalize(14),
+            paddingVertical: normalize(8),
+            borderRadius: normalize(12),
           }}
         >
-          <Feather name="log-out" size={14} color="#fbbf24" />
-          <Text style={{ color: "#fbbf24", fontWeight: "700", fontSize: 13 }}>
+          <Feather name="log-out" size={normalize(14)} color="#fbbf24" />
+          <Text style={{ color: "#fbbf24", fontWeight: "700", fontSize: normalize(13) }}>
             Logout
           </Text>
         </TouchableOpacity>

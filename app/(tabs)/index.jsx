@@ -13,7 +13,7 @@ import { useAppContext } from "../../lib/AppContext";
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function Home() {
   const { isOnline, ordersData } = useAppContext();
-  const [showNewOrder, setShowNewOrder] = useState(true); // Control new order popup visibility
+  const [showNewOrder, setShowNewOrder] = useState(false); // Control new order popup visibility
 
   const toggleOnlineStatus = () => {
     // setIsOnline((prev) => !prev);
