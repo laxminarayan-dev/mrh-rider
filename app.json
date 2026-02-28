@@ -43,6 +43,13 @@
           "backgroundColor": "#09090b"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "04d34f17-08ca-4538-8bd8-5a7fd63a422c"
+      }
+    },
+    "owner": "luckyjaiswal.dev"
   }
 }
