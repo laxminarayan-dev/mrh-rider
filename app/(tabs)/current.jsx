@@ -1,4 +1,5 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -8,7 +9,7 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { useLocationStatus } from "../../components/mycomponents/CurrentComponent/useLocationStatus";
 import openGoogleMaps from "../../components/mycomponents/OpenGoogleMap";
@@ -21,8 +22,17 @@ const DEMO_ORDERS = [
     id: "ORD-93C7D2",
     customer: "Priya Patel",
     phone: "+91 91234 56780",
-    pickup: { name: "Wok Express", address: "MG Road, Gurgaon", lat: 28.4595, lng: 77.0266 },
-    delivery: { address: "Sushant Lok 1, C Block, House 14", lat: 28.4677, lng: 77.0714 },
+    pickup: {
+      name: "Wok Express",
+      address: "MG Road, Gurgaon",
+      lat: 28.4595,
+      lng: 77.0266,
+    },
+    delivery: {
+      address: "Sushant Lok 1, C Block, House 14",
+      lat: 28.4677,
+      lng: 77.0714,
+    },
     items: 1,
     amount: "₹220",
     payment: "Online",
@@ -34,8 +44,17 @@ const DEMO_ORDERS = [
     id: "ORD-28A1F3",
     customer: "Rahul Sharma",
     phone: "+91 98765 43210",
-    pickup: { name: "Tandoori Bites", address: "Sector 22, Gurgaon", lat: 28.4595, lng: 77.0266 },
-    delivery: { address: "DLF Phase 3, Block B, Flat 402", lat: 28.4945, lng: 77.0935 },
+    pickup: {
+      name: "Tandoori Bites",
+      address: "Sector 22, Gurgaon",
+      lat: 28.4595,
+      lng: 77.0266,
+    },
+    delivery: {
+      address: "DLF Phase 3, Block B, Flat 402",
+      lat: 28.4945,
+      lng: 77.0935,
+    },
     items: 3,
     amount: "₹485",
     payment: "COD",
@@ -43,16 +62,57 @@ const DEMO_ORDERS = [
     status: "picking_up",
     placedAt: "2:35 PM",
   },
-
 ];
 
 const STATUS_CONFIG = {
-  picking_up: { label: "Picking Up", color: "#f59e0b", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.25)", icon: "package", dot: "#f59e0b" },
-  ready: { label: "Ready", color: "#f59e0b", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.25)", icon: "package", dot: "#f59e0b" },
-  on_the_way: { label: "On the Way", color: "#22c55e", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.25)", icon: "navigation", dot: "#22c55e" },
-  out_for_delivery: { label: "Out for Delivery", color: "#22c55e", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.25)", icon: "navigation", dot: "#22c55e" },
-  arrived: { label: "Arrived", color: "#60a5fa", bg: "rgba(96,165,250,0.12)", border: "rgba(96,165,250,0.25)", icon: "map-pin", dot: "#60a5fa" },
-  delivered: { label: "Delivered", color: "#6b7280", bg: "rgba(107,114,128,0.12)", border: "rgba(107,114,128,0.25)", icon: "check-circle", dot: "#6b7280" },
+  picking_up: {
+    label: "Picking Up",
+    color: "#f59e0b",
+    bg: "rgba(245,158,11,0.12)",
+    border: "rgba(245,158,11,0.25)",
+    icon: "package",
+    dot: "#f59e0b",
+  },
+  ready: {
+    label: "Ready",
+    color: "#f59e0b",
+    bg: "rgba(245,158,11,0.12)",
+    border: "rgba(245,158,11,0.25)",
+    icon: "package",
+    dot: "#f59e0b",
+  },
+  on_the_way: {
+    label: "On the Way",
+    color: "#22c55e",
+    bg: "rgba(34,197,94,0.12)",
+    border: "rgba(34,197,94,0.25)",
+    icon: "navigation",
+    dot: "#22c55e",
+  },
+  out_for_delivery: {
+    label: "Out for Delivery",
+    color: "#22c55e",
+    bg: "rgba(34,197,94,0.12)",
+    border: "rgba(34,197,94,0.25)",
+    icon: "navigation",
+    dot: "#22c55e",
+  },
+  arrived: {
+    label: "Arrived",
+    color: "#60a5fa",
+    bg: "rgba(96,165,250,0.12)",
+    border: "rgba(96,165,250,0.25)",
+    icon: "map-pin",
+    dot: "#60a5fa",
+  },
+  delivered: {
+    label: "Delivered",
+    color: "#6b7280",
+    bg: "rgba(107,114,128,0.12)",
+    border: "rgba(107,114,128,0.25)",
+    icon: "check-circle",
+    dot: "#6b7280",
+  },
 };
 
 // ─── Pill Badge ───────────────────────────────────────────────────────────────
@@ -64,9 +124,17 @@ function StatusBadge({ status }) {
     if (status === "on_the_way" || status === "out_for_delivery") {
       Animated.loop(
         Animated.sequence([
-          Animated.timing(pulse, { toValue: 1.5, duration: 800, useNativeDriver: true }),
-          Animated.timing(pulse, { toValue: 1, duration: 800, useNativeDriver: true }),
-        ])
+          Animated.timing(pulse, {
+            toValue: 1.5,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulse, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ]),
       ).start();
     }
   }, [status]);
@@ -94,7 +162,14 @@ function StatusBadge({ status }) {
           transform: [{ scale: pulse }],
         }}
       />
-      <Text style={{ color: cfg.color, fontSize: normalize(11), fontWeight: "700", letterSpacing: 0.3 }}>
+      <Text
+        style={{
+          color: cfg.color,
+          fontSize: normalize(11),
+          fontWeight: "700",
+          letterSpacing: 0.3,
+        }}
+      >
         {cfg.label}
       </Text>
     </View>
@@ -105,20 +180,37 @@ function StatusBadge({ status }) {
 function InfoChip({ iconLib, icon, label, iconSize = 12 }) {
   const Icon = iconLib === "mci" ? MaterialCommunityIcons : Feather;
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: normalize(4) }}>
+    <View
+      style={{ flexDirection: "row", alignItems: "center", gap: normalize(4) }}
+    >
       <Icon name={icon} size={normalize(iconSize)} color="#3f3f46" />
-      <Text style={{ fontSize: normalize(12), color: "#71717a", fontWeight: "600" }}>{label}</Text>
+      <Text
+        style={{ fontSize: normalize(12), color: "#71717a", fontWeight: "600" }}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
 
 // ─── Divider ──────────────────────────────────────────────────────────────────
 const Divider = () => (
-  <View style={{ height: 1, backgroundColor: "#18181b", marginHorizontal: normalize(16) }} />
+  <View
+    style={{
+      height: 1,
+      backgroundColor: "#18181b",
+      marginHorizontal: normalize(16),
+    }}
+  />
 );
 
 // ─── Order Card ──────────────────────────────────────────────────────────────
-function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) {
+function OrderCard({
+  ordersData,
+  index,
+  hasArrivedToCurrent,
+  handleDelivered,
+}) {
   const anim = useRef(new Animated.Value(0)).current;
   const cfg = STATUS_CONFIG[ordersData.status] || STATUS_CONFIG.picking_up;
   const isActive = index === 0;
@@ -139,8 +231,18 @@ function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) 
       style={{
         opacity: anim,
         transform: [
-          { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [normalize(24), 0] }) },
-          { scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.97, 1] }) },
+          {
+            translateY: anim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [normalize(24), 0],
+            }),
+          },
+          {
+            scale: anim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.97, 1],
+            }),
+          },
         ],
         opacity: isActive ? 1 : 0.4,
         pointerEvents: isActive ? "auto" : "none",
@@ -169,7 +271,13 @@ function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) 
             paddingBottom: normalize(12),
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: normalize(10) }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: normalize(10),
+            }}
+          >
             <View
               style={{
                 width: normalize(38),
@@ -182,13 +290,30 @@ function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) 
                 justifyContent: "center",
               }}
             >
-              <MaterialCommunityIcons name={cfg.icon} size={normalize(19)} color={cfg.color} />
+              <MaterialCommunityIcons
+                name={cfg.icon}
+                size={normalize(19)}
+                color={cfg.color}
+              />
             </View>
             <View>
-              <Text style={{ fontSize: normalize(14), color: "#f4f4f5", fontWeight: "800", letterSpacing: 0.2 }}>
+              <Text
+                style={{
+                  fontSize: normalize(14),
+                  color: "#f4f4f5",
+                  fontWeight: "800",
+                  letterSpacing: 0.2,
+                }}
+              >
                 {ordersData.id}
               </Text>
-              <Text style={{ fontSize: normalize(11), color: "#3f3f46", marginTop: normalize(2) }}>
+              <Text
+                style={{
+                  fontSize: normalize(11),
+                  color: "#3f3f46",
+                  marginTop: normalize(2),
+                }}
+              >
                 Placed at {ordersData.placedAt}
               </Text>
             </View>
@@ -199,8 +324,19 @@ function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) 
         <Divider />
 
         {/* Route */}
-        <View style={{ paddingHorizontal: normalize(16), paddingVertical: normalize(14) }}>
-          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: normalize(12) }}>
+        <View
+          style={{
+            paddingHorizontal: normalize(16),
+            paddingVertical: normalize(14),
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              gap: normalize(12),
+            }}
+          >
             <View style={{ alignItems: "center", width: normalize(20) }}>
               <View
                 style={{
@@ -214,20 +350,65 @@ function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) 
                   justifyContent: "center",
                 }}
               >
-                <View style={{ width: normalize(7), height: normalize(7), borderRadius: normalize(4), backgroundColor: "#22c55e" }} />
+                <View
+                  style={{
+                    width: normalize(7),
+                    height: normalize(7),
+                    borderRadius: normalize(4),
+                    backgroundColor: "#22c55e",
+                  }}
+                />
               </View>
-              <View style={{ width: 1.5, height: normalize(24), backgroundColor: "#27272a", marginTop: normalize(3) }} />
+              <View
+                style={{
+                  width: 1.5,
+                  height: normalize(24),
+                  backgroundColor: "#27272a",
+                  marginTop: normalize(3),
+                }}
+              />
             </View>
             <View style={{ flex: 1, paddingBottom: normalize(12) }}>
-              <Text style={{ fontSize: normalize(10), color: "#3f3f46", fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: normalize(3) }}>
+              <Text
+                style={{
+                  fontSize: normalize(10),
+                  color: "#3f3f46",
+                  fontWeight: "700",
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                  marginBottom: normalize(3),
+                }}
+              >
                 Pickup
               </Text>
-              <Text style={{ fontSize: normalize(13), color: "#e4e4e7", fontWeight: "700" }}>{ordersData.pickup.name}</Text>
-              <Text style={{ fontSize: normalize(12), color: "#52525b", marginTop: normalize(2) }}>{ordersData.pickup.address}</Text>
+              <Text
+                style={{
+                  fontSize: normalize(13),
+                  color: "#e4e4e7",
+                  fontWeight: "700",
+                }}
+              >
+                {ordersData.pickup.name}
+              </Text>
+              <Text
+                style={{
+                  fontSize: normalize(12),
+                  color: "#52525b",
+                  marginTop: normalize(2),
+                }}
+              >
+                {ordersData.pickup.address}
+              </Text>
             </View>
           </View>
 
-          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: normalize(12) }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              gap: normalize(12),
+            }}
+          >
             <View style={{ width: normalize(20), alignItems: "center" }}>
               <View
                 style={{
@@ -241,14 +422,38 @@ function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) 
                   justifyContent: "center",
                 }}
               >
-                <View style={{ width: normalize(7), height: normalize(7), borderRadius: normalize(4), backgroundColor: "#ef4444" }} />
+                <View
+                  style={{
+                    width: normalize(7),
+                    height: normalize(7),
+                    borderRadius: normalize(4),
+                    backgroundColor: "#ef4444",
+                  }}
+                />
               </View>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: normalize(10), color: "#3f3f46", fontWeight: "700", textTransform: "uppercase", letterSpacing: 1, marginBottom: normalize(3) }}>
+              <Text
+                style={{
+                  fontSize: normalize(10),
+                  color: "#3f3f46",
+                  fontWeight: "700",
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                  marginBottom: normalize(3),
+                }}
+              >
                 Delivery
               </Text>
-              <Text style={{ fontSize: normalize(13), color: "#e4e4e7", fontWeight: "700" }}>{ordersData.delivery.address}</Text>
+              <Text
+                style={{
+                  fontSize: normalize(13),
+                  color: "#e4e4e7",
+                  fontWeight: "700",
+                }}
+              >
+                {ordersData.delivery.address}
+              </Text>
             </View>
           </View>
         </View>
@@ -265,11 +470,34 @@ function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) 
             gap: normalize(14),
           }}
         >
-          <InfoChip iconLib="feather" icon="user" label={ordersData.customer} iconSize={12} />
-          <InfoChip iconLib="mci" icon="map-marker-distance" label={ordersData.distance} iconSize={13} />
-          <InfoChip iconLib="mci" icon="cash" label={ordersData.payment} iconSize={14} />
+          <InfoChip
+            iconLib="feather"
+            icon="user"
+            label={ordersData.customer}
+            iconSize={12}
+          />
+          <InfoChip
+            iconLib="mci"
+            icon="map-marker-distance"
+            label={ordersData.distance}
+            iconSize={13}
+          />
+          <InfoChip
+            iconLib="mci"
+            icon="cash"
+            label={ordersData.payment}
+            iconSize={14}
+          />
           <View style={{ marginLeft: "auto" }}>
-            <Text style={{ fontSize: normalize(15), color: "#f4f4f5", fontWeight: "800" }}>{ordersData.amount}</Text>
+            <Text
+              style={{
+                fontSize: normalize(15),
+                color: "#f4f4f5",
+                fontWeight: "800",
+              }}
+            >
+              {ordersData.amount}
+            </Text>
           </View>
         </View>
 
@@ -301,11 +529,18 @@ function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) 
             }}
           >
             <Feather name="phone" size={normalize(14)} color="#71717a" />
-            <Text style={{ color: "#a1a1aa", fontSize: normalize(13), fontWeight: "700" }}>Call</Text>
+            <Text
+              style={{
+                color: "#a1a1aa",
+                fontSize: normalize(13),
+                fontWeight: "700",
+              }}
+            >
+              Call
+            </Text>
           </TouchableOpacity>
 
-          {hasArrivedToCurrent ?
-
+          {hasArrivedToCurrent ? (
             <TouchableOpacity
               onPress={() => handleDelivered(ordersData.id)}
               activeOpacity={0.75}
@@ -321,13 +556,28 @@ function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) 
               }}
             >
               <Feather name="navigation" size={normalize(14)} color="#0a0a0b" />
-              <Text style={{ color: "#0a0a0b", fontSize: normalize(13), fontWeight: "800", letterSpacing: 0.2 }}>Mark As Delivered</Text>
+              <Text
+                style={{
+                  color: "#0a0a0b",
+                  fontSize: normalize(13),
+                  fontWeight: "800",
+                  letterSpacing: 0.2,
+                }}
+              >
+                Mark As Delivered
+              </Text>
             </TouchableOpacity>
-            : <TouchableOpacity
-              onPress={() => openGoogleMaps(
-                { lat: ordersData.pickup.lat, lng: ordersData.pickup.lng },
-                { lat: ordersData.delivery.lat, lng: ordersData.delivery.lng }
-              )}
+          ) : (
+            <TouchableOpacity
+              onPress={() =>
+                openGoogleMaps(
+                  { lat: ordersData.pickup.lat, lng: ordersData.pickup.lng },
+                  {
+                    lat: ordersData.delivery.lat,
+                    lng: ordersData.delivery.lng,
+                  },
+                )
+              }
               activeOpacity={0.75}
               style={{
                 flex: 2.2,
@@ -341,8 +591,18 @@ function OrderCard({ ordersData, index, hasArrivedToCurrent, handleDelivered }) 
               }}
             >
               <Feather name="navigation" size={normalize(14)} color="#0a0a0b" />
-              <Text style={{ color: "#0a0a0b", fontSize: normalize(13), fontWeight: "800", letterSpacing: 0.2 }}>Navigate</Text>
-            </TouchableOpacity>}
+              <Text
+                style={{
+                  color: "#0a0a0b",
+                  fontSize: normalize(13),
+                  fontWeight: "800",
+                  letterSpacing: 0.2,
+                }}
+              >
+                Navigate
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Animated.View>
@@ -355,12 +615,26 @@ function EmptyCurrentOrders() {
   const float = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.spring(anim, { toValue: 1, useNativeDriver: true, tension: 45, friction: 8, delay: 200 }).start();
+    Animated.spring(anim, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 45,
+      friction: 8,
+      delay: 200,
+    }).start();
     Animated.loop(
       Animated.sequence([
-        Animated.timing(float, { toValue: 1, duration: 2600, useNativeDriver: true }),
-        Animated.timing(float, { toValue: 0, duration: 2600, useNativeDriver: true }),
-      ])
+        Animated.timing(float, {
+          toValue: 1,
+          duration: 2600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(float, {
+          toValue: 0,
+          duration: 2600,
+          useNativeDriver: true,
+        }),
+      ]),
     ).start();
   }, []);
 
@@ -368,7 +642,14 @@ function EmptyCurrentOrders() {
     <Animated.View
       style={{
         opacity: anim,
-        transform: [{ scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.93, 1] }) }],
+        transform: [
+          {
+            scale: anim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.93, 1],
+            }),
+          },
+        ],
         marginTop: normalize(40),
       }}
     >
@@ -385,7 +666,14 @@ function EmptyCurrentOrders() {
       >
         <Animated.View
           style={{
-            transform: [{ translateY: float.interpolate({ inputRange: [0, 1], outputRange: [0, normalize(-8)] }) }],
+            transform: [
+              {
+                translateY: float.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, normalize(-8)],
+                }),
+              },
+            ],
             marginBottom: normalize(24),
           }}
         >
@@ -405,7 +693,16 @@ function EmptyCurrentOrders() {
           </View>
         </Animated.View>
 
-        <Text style={{ fontSize: normalize(18), fontWeight: "800", color: "#f4f4f5", textAlign: "center", marginBottom: normalize(8), letterSpacing: -0.3 }}>
+        <Text
+          style={{
+            fontSize: normalize(18),
+            fontWeight: "800",
+            color: "#f4f4f5",
+            textAlign: "center",
+            marginBottom: normalize(8),
+            letterSpacing: -0.3,
+          }}
+        >
           No Active Orders
         </Text>
         <Text
@@ -418,14 +715,22 @@ function EmptyCurrentOrders() {
             maxWidth: normalize(240),
           }}
         >
-          When you accept a delivery, it will appear here with full details and navigation.
+          When you accept a delivery, it will appear here with full details and
+          navigation.
         </Text>
-        <View style={{ marginTop: normalize(26), width: normalize(36), height: normalize(3), borderRadius: normalize(2), backgroundColor: "rgba(245,158,11,0.3)" }} />
+        <View
+          style={{
+            marginTop: normalize(26),
+            width: normalize(36),
+            height: normalize(3),
+            borderRadius: normalize(2),
+            backgroundColor: "rgba(245,158,11,0.3)",
+          }}
+        />
       </View>
     </Animated.View>
   );
 }
-
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 function Current() {
@@ -447,7 +752,7 @@ function Current() {
     let nearest = null;
     let minDistance = Infinity;
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       const dist = getDistanceMeters(currentLocation, {
         lat: order.delivery.lat,
         lng: order.delivery.lng,
@@ -459,12 +764,8 @@ function Current() {
       }
     });
 
-
     setCurrentOrder(nearest);
-
-
   }, [currentLocation, orders]);
-
 
   useEffect(() => {
     if (!currentLocation || orders.length === 0) return;
@@ -480,16 +781,18 @@ function Current() {
     setSortedOrders(sorted);
 
     hasSortedRef.current = true; // lock it
-
   }, [currentLocation, orders]);
 
   useEffect(() => {
-    const isArrived = hasArrived(currentLocation, { lat: currentOrder?.delivery.lat, lng: currentOrder?.delivery.lng });
+    const isArrived = hasArrived(currentLocation, {
+      lat: currentOrder?.delivery.lat,
+      lng: currentOrder?.delivery.lng,
+    });
     setHasArrivedToCurrent(isArrived);
   }, [currentLocation, currentOrder]);
 
   const handleDelivered = (id) => {
-    const updated = orders.filter(o => o.id !== id);
+    const updated = orders.filter((o) => o.id !== id);
     setOrders(updated);
 
     hasSortedRef.current = false; // unlock sorting
@@ -497,7 +800,8 @@ function Current() {
 
   if (locationStatus === "checking") {
     return null;
-  } if (locationStatus === "no-permission") {
+  }
+  if (locationStatus === "no-permission") {
     return (
       <View style={styles.guardContainer}>
         <Text style={styles.guardText}>
@@ -512,7 +816,8 @@ function Current() {
         </Pressable>
       </View>
     );
-  } if (locationStatus === "gps-off") {
+  }
+  if (locationStatus === "gps-off") {
     return (
       <View style={styles.guardContainer}>
         <Text style={styles.guardText}>
@@ -532,16 +837,35 @@ function Current() {
   }
 
   return (
-
     <ScrollView
       style={{ flex: 1, backgroundColor: "#09090b" }}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: normalize(100), paddingTop: normalize(24) }}
+      contentContainerStyle={{
+        paddingBottom: normalize(100),
+        paddingTop: normalize(24),
+      }}
     >
       {/* Header */}
-      <View style={{ paddingHorizontal: normalize(20), marginBottom: normalize(20) }}>
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: normalize(10) }}>
+      <View
+        style={{
+          paddingHorizontal: normalize(20),
+          marginBottom: normalize(20),
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: normalize(10),
+            }}
+          >
             <View
               style={{
                 width: normalize(4),
@@ -550,7 +874,14 @@ function Current() {
                 backgroundColor: "#f59e0b",
               }}
             />
-            <Text style={{ fontSize: normalize(21), color: "#f4f4f5", fontWeight: "800", letterSpacing: -0.5 }}>
+            <Text
+              style={{
+                fontSize: normalize(21),
+                color: "#f4f4f5",
+                fontWeight: "800",
+                letterSpacing: -0.5,
+              }}
+            >
               Current Orders
             </Text>
           </View>
@@ -569,8 +900,21 @@ function Current() {
                 gap: normalize(5),
               }}
             >
-              <View style={{ width: normalize(6), height: normalize(6), borderRadius: normalize(3), backgroundColor: "#f59e0b" }} />
-              <Text style={{ fontSize: normalize(12), color: "#f59e0b", fontWeight: "700" }}>
+              <View
+                style={{
+                  width: normalize(6),
+                  height: normalize(6),
+                  borderRadius: normalize(3),
+                  backgroundColor: "#f59e0b",
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: normalize(12),
+                  color: "#f59e0b",
+                  fontWeight: "700",
+                }}
+              >
                 {sortedOrders.length} active
               </Text>
             </View>
@@ -583,31 +927,44 @@ function Current() {
         {orders.length === 0 ? (
           <EmptyCurrentOrders />
         ) : sortedOrders.length == 0 ? (
-          <View style={{ marginTop: normalize(40), alignItems: "center", flexDirection: "column", alignItems: "center", gap: normalize(100) }}>
-            <Text style={{ color: "#71717a", fontSize: normalize(13), textAlign: "center", marginTop: normalize(40) }}>
+          <View
+            style={{
+              marginTop: normalize(40),
+              alignItems: "center",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: normalize(100),
+            }}
+          >
+            <Text
+              style={{
+                color: "#71717a",
+                fontSize: normalize(13),
+                textAlign: "center",
+                marginTop: normalize(40),
+              }}
+            >
               Sorting orders based on your location...
             </Text>
             <ActivityIndicator size="large" color="#f59e0b" />
           </View>
         ) : (
-          (
-            sortedOrders.map((o, i) => <OrderCard
+          sortedOrders.map((o, i) => (
+            <OrderCard
               key={o.id}
               ordersData={o}
               index={i}
               hasArrivedToCurrent={hasArrivedToCurrent}
-              handleDelivered={handleDelivered} />)
-          )
+              handleDelivered={handleDelivered}
+            />
+          ))
         )}
       </View>
     </ScrollView>
-
   );
 }
 
-
 export default Current;
-
 
 const styles = {
   guardContainer: {
