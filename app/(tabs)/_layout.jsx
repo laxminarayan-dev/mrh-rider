@@ -1,3 +1,4 @@
+import { normalize } from "@/lib/normalize";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import Header from "../../components/mycomponents/Header";
@@ -14,29 +15,30 @@ export default function TabsLayout() {
             backgroundColor: "#1a201d",
             borderTopWidth: 1,
             borderTopColor: "#374151",
-            paddingHorizontal: 10,
-            paddingTop: 4,
-            height: 68,
+            paddingHorizontal: normalize(10),
+            paddingTop: normalize(4),
+            paddingBottom: normalize(8),
+            height: normalize(78),
             elevation: 8,
           },
           tabBarActiveTintColor: "#fbbf24",
           tabBarInactiveTintColor: "#6b7280",
           tabBarLabelStyle: {
-            fontSize: 14,
+            fontSize: normalize(14),
             fontWeight: "800",
             textTransform: "capitalize",
-            marginTop: 2,
-            marginBottom: 6,
+            marginTop: normalize(2),
+            marginBottom: normalize(6),
           },
           tabBarIconStyle: {
-            width: 24,
-            height: 24,
+            width: normalize(24),
+            height: normalize(24),
           },
           tabBarItemStyle: {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            paddingVertical: 6,
+            paddingVertical: normalize(6),
           },
         }}
       >
@@ -45,7 +47,7 @@ export default function TabsLayout() {
           options={{
             title: "Home",
             tabBarIcon: ({ color }) => (
-              <MaterialIcons name="home" size={24} color={color} />
+              <MaterialIcons name="home" size={normalize(24)} color={color} />
             ),
           }}
         />
@@ -54,7 +56,7 @@ export default function TabsLayout() {
           options={{
             title: "Current",
             tabBarIcon: ({ color }) => (
-              <MaterialIcons name="bolt" size={24} color={color} />
+              <MaterialIcons name="bolt" size={normalize(24)} color={color} />
             ),
           }}
         />
@@ -63,7 +65,7 @@ export default function TabsLayout() {
           options={{
             title: "History",
             tabBarIcon: ({ color }) => (
-              <MaterialIcons name="history" size={24} color={color} />
+              <MaterialIcons name="history" size={normalize(24)} color={color} />
             ),
           }}
         />

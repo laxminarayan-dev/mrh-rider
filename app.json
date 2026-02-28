@@ -13,15 +13,20 @@
       "backgroundColor": "#09090b"
     },
     "android": {
-      "package": "com.anonymous.riderapp",
+      "package": "in.mrhalwai.riderapp",
       "splash": {
         "image": "./assets/myImages/splash.png",
         "resizeMode": "contain",
         "backgroundColor": "#09090b"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBHHfu5SEPTdkonpOwcmqqTRcYzfKLbsiA"
+        }
       }
     },
     "ios": {
-      "bundleIdentifier": "com.anonymous.riderapp",
+      "bundleIdentifier": "in.mrhalwai.riderapp",
       "splash": {
         "image": "./assets/myImages/splash.png",
         "resizeMode": "contain",
