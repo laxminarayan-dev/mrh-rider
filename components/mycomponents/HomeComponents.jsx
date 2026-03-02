@@ -3,6 +3,7 @@ import {
     Feather,
     FontAwesome5,
     MaterialCommunityIcons,
+    MaterialIcons,
 } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -244,7 +245,7 @@ export function WelcomeCard({ isOnline = false, onToggleOnline = () => { } }) {
 
 // ─── Stat Card ───────────────────────────────────────────────────────────────
 
-export function StatCard({ ordersData }) {
+export function StatCard({ ordersData, isOnline }) {
 
     const avgMinutes = 24;
     const targetMinutes = 30;
@@ -259,7 +260,7 @@ export function StatCard({ ordersData }) {
 
             {/* Two half-width cards */}
             <View style={{ flexDirection: "row", gap: normalize(14) }}>
-                <ActiveOrdersCard data={ordersData} delay={100} />
+                <ActiveOrdersCard data={ordersData} delay={100} isOnline={isOnline} />
                 <AvgTimeCard data={ordersData} minutes={avgMinutes} targetMinutes={targetMinutes} delay={160} />
             </View>
         </View>
@@ -431,9 +432,12 @@ export function OrderRow({ item, index, last }) {
 
                 {/* Amount + status */}
                 <View style={{ alignItems: "flex-end" }}>
-                    <Text style={{ color: "#f0f0f0", fontWeight: "800", fontSize: normalize(15) }}>
-                        {safeAmount}
-                    </Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: normalize(1) }}>
+                        <MaterialIcons name="currency-rupee" size={normalize(14)} color="#f0f0f0" />
+                        <Text style={{ color: "#f0f0f0", fontWeight: "800", fontSize: normalize(15) }}>
+                            {safeAmount}
+                        </Text>
+                    </View>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: normalize(7), marginTop: normalize(3), justifyContent: "flex-end" }}>
                         <View style={{
                             width: normalize(5),
@@ -497,10 +501,11 @@ export function NewOrderPopup({ visible = false, onClose = () => { } }) {
 /* ─── FULL WIDTH — 7-day bar chart ─── */
 export function WeeklyDeliveryCard({ data, delay = 0 }) {
 
-    const [weeklyData, setWeeklyData] = useState(getWeeklyData(data));  // deliveries per of last 7 days, with day labels and isRecent flag
+    const [weeklyData, setWeeklyData] = useState([]);  // deliveries per of last 7 days, with day labels and isRecent flag
 
     useEffect(() => {
-        setWeeklyData(getWeeklyData(data))  // deliveries per of last 7 days, with day labels and isRecent flag
+        let oldData = data.filter(d => d.status === "delivered");
+        setWeeklyData(getWeeklyData(oldData))  // deliveries per of last 7 days, with day labels and isRecent flag
     }, [data])
 
     const anim = useRef(new Animated.Value(0)).current;
@@ -590,16 +595,16 @@ export function WeeklyDeliveryCard({ data, delay = 0 }) {
 }
 
 /* ─── HALF WIDTH — Active Orders ─── */
-export function ActiveOrdersCard({ data, delay = 100 }) {
+export function ActiveOrdersCard({ data, delay = 100, isOnline }) {
     const [count, setCount] = useState(0);  // count of active orders
+    const anim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        let c = getOrdersByStatus(data)?.out_for_delivery || getOrdersByStatus(data)?.ready || [];
+        let c = getOrdersByStatus(data)?.out_for_delivery || getOrdersByStatus(data)?.assigned || [];
         setCount(c.length)
     }, [data])
 
 
-    const anim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
         Animated.spring(anim, { toValue: 1, useNativeDriver: true, tension: 55, friction: 8, delay }).start();
     }, []);
@@ -607,6 +612,26 @@ export function ActiveOrdersCard({ data, delay = 100 }) {
     // small dot indicators
     const MAX_DOTS = 6;
     const dots = Array.from({ length: MAX_DOTS }, (_, i) => i < count);
+
+    if (!isOnline) {
+        return (
+            <Animated.View style={[{ flex: 1 }, { opacity: anim, transform: [{ scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }, { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
+                <View style={{ backgroundColor: CARD_BG, borderWidth: 1, borderColor: BORDER, borderRadius: normalize(20), padding: normalize(18), minHeight: normalize(160), overflow: "hidden", flex: 1, alignItems: "center", justifyContent: "center", gap: normalize(14) }}>
+                    {/* glow */}
+                    <View style={{ position: "absolute", bottom: normalize(-24), left: normalize(-24), width: normalize(90), height: normalize(90), borderRadius: normalize(45), backgroundColor: "rgba(212,168,67,0.05)" }} pointerEvents="none" />
+
+                    {/* icon */}
+                    <View style={{ width: normalize(36), height: normalize(36), borderRadius: normalize(10), backgroundColor: GOLD_DIM, borderWidth: 1, borderColor: GOLD_BORDER, alignItems: "center", justifyContent: "center", marginBottom: normalize(2) }}>
+                        <Feather name="wifi" size={normalize(15)} color={GOLD} />
+                    </View>
+
+                    <Text style={{ fontSize: normalize(14), fontWeight: "700", color: "#52525b", textAlign: "center" }}>
+                        Go online to see active orders and start delivering!
+                    </Text>
+                </View>
+            </Animated.View>
+        );
+    }
 
     return (
         <Animated.View style={[{ flex: 1 }, { opacity: anim, transform: [{ scale: anim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }, { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
@@ -707,7 +732,7 @@ export function AvgTimeCard({ data, targetMinutes = 30, delay = 160 }) {
                     <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: normalize(5) }}>
                         <Text style={{ fontSize: normalize(8), color: "#3f3f46", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.8 }}>vs target</Text>
                         <Text style={{ fontSize: normalize(8), color: isGood ? "#4ade80" : "#f87171", fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.8 }}>
-                            {isGood ? `${targetMinutes - avgMinutes}m under` : `${avgMinutes - targetMinutes}m over`}
+                            {isGood ? `${(targetMinutes - avgMinutes).toFixed(2)} min under` : `${(avgMinutes - targetMinutes).toFixed(2)} min over`}
                         </Text>
                     </View>
                     <View style={{ height: normalize(4), backgroundColor: "rgba(255,255,255,0.05)", borderRadius: normalize(2), overflow: "hidden" }}>

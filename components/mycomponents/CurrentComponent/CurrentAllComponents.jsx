@@ -161,12 +161,13 @@ export function OrderCard({
     handleDelivered,
 }) {
     const anim = useRef(new Animated.Value(0)).current;
+    if (!ordersData?.shop?.shopLocation?.coordinates) return null;
     const cfg = STATUS_CONFIG[ordersData.status] || STATUS_CONFIG.picking_up;
     const isActive = index === 0;
     const { time: placedAt } = getTimeAndDate(ordersData.createdAt)
     const shopLocation = {
-        lat: ordersData.shop.shopLocation.coordinates[1],
-        lng: ordersData.shop.shopLocation.coordinates[0],
+        lat: ordersData.shop?.shopLocation?.coordinates[1],
+        lng: ordersData.shop?.shopLocation?.coordinates[0],
     }
     const deliveryLocation = {
         lat: ordersData.deliveryAddress[0]?.coordinates[0],
@@ -347,7 +348,7 @@ export function OrderCard({
                                     fontWeight: "700",
                                 }}
                             >
-                                {ordersData.shop.name}
+                                {ordersData?.shop?.name}
                             </Text>
                             <Text
                                 style={{
@@ -356,7 +357,7 @@ export function OrderCard({
                                     marginTop: normalize(2),
                                 }}
                             >
-                                {ordersData.shop?.shopLocation?.formattedAddress}
+                                {ordersData?.shop?.shopLocation?.formattedAddress}
                             </Text>
                         </View>
                     </View>
@@ -411,7 +412,7 @@ export function OrderCard({
                                     fontWeight: "700",
                                 }}
                             >
-                                {ordersData.deliveryAddress[0]?.formattedAddress}
+                                {ordersData?.deliveryAddress[0]?.formattedAddress}
                             </Text>
                         </View>
                     </View>

@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   Text,
@@ -12,11 +12,23 @@ import { useAppContext } from "../../lib/AppContext";
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function Home() {
-  const { isOnline, ordersData, setIsOnline } = useAppContext();
+  const { isOnline, ordersData, handleActiveStatusChange, isLoading } = useAppContext();
   const [showNewOrder, setShowNewOrder] = useState(false); // Control new order popup visibility
+  const [historyData, setHistoryData] = useState([]); // Store order history data
 
-  const toggleOnlineStatus = () => {
-    setIsOnline((prev) => !prev);
+  useEffect(() => {
+    if (ordersData && ordersData.length > 0) {
+      let data = ordersData.filter(order => order.status === "delivered" || order.status === "cancelled");
+      setHistoryData(data);
+    }
+  }, [ordersData])
+
+  if (!ordersData || isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#09090b" }}>
+        <Text style={{ color: "#6b7280", fontSize: 14 }}>Loading...</Text>
+      </View>
+    );
   }
 
   return (
@@ -27,7 +39,7 @@ export default function Home() {
       contentContainerStyle={{ paddingBottom: 48, paddingTop: 24 }}
     >
       {/* Welcome Hero */}
-      <WelcomeCard isOnline={isOnline} onToggleOnline={toggleOnlineStatus} />
+      <WelcomeCard isOnline={isOnline} onToggleOnline={() => handleActiveStatusChange(!isOnline)} />
 
       {/* New Order Popup */}
       <NewOrderPopup visible={showNewOrder} onClose={() => setShowNewOrder(false)} />
@@ -45,7 +57,7 @@ export default function Home() {
       {/* Stats Rows */}
       {/* First Card - Full Width */}
       <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
-        <StatCard ordersData={ordersData} />
+        <StatCard ordersData={ordersData} isOnline={isOnline} />
       </View>
 
       {/* Section label */}
@@ -67,7 +79,7 @@ export default function Home() {
 
       {/* Orders list / empty state */}
       <View style={{ paddingHorizontal: 20 }}>
-        {ordersData.length === 0 ? (
+        {historyData.length === 0 ? (
           <EmptyState />
         ) : (
           <View
@@ -79,8 +91,8 @@ export default function Home() {
               overflow: "hidden",
             }}
           >
-            {ordersData.slice(-5).reverse().map((o, i) => (
-              <OrderRow key={o._id} item={o} index={i} last={i === ordersData.length - 1} />
+            {historyData.slice(-5).reverse().map((o, i) => (
+              <OrderRow key={`${o._id}${o.createdAt}`} item={o} index={i} last={i === historyData.length - 1} />
             ))}
           </View>
         )}

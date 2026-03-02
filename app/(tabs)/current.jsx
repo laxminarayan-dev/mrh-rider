@@ -25,10 +25,15 @@ function Current() {
   // Initialize orders from props (simulate fetching from API)
   useEffect(() => {
     let filtered = ordersData.filter((o) =>
-      ["picking_up", "ready", "on_the_way", "out_for_delivery"].includes(o.status),
+      ["picking_up", "ready", "on_the_way", "out_for_delivery", "assigned"].includes(o.status),
     );
     setOrders(filtered);
+    hasSortedRef.current = false; // reset sorting lock when orders change
   }, [ordersData]);
+
+  useEffect(() => {
+    hasSortedRef.current = false; // reset sorting lock when orders change
+  }, [orders])
 
   // Find nearest order based on current location
   useEffect(() => {

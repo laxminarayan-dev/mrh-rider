@@ -1,12 +1,24 @@
 import { normalize } from "@/lib/normalize";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { useEffect } from "react";
 import Header from "../../components/mycomponents/Header";
-import { AppProvider } from "../../lib/AppContext";
+import { useAppContext } from "../../lib/AppContext";
+import fetchOrdersData from "../../lib/fetchOrdersData";
+
 
 export default function TabsLayout() {
+
+
+  const { setOrdersData, setIsLoading } = useAppContext();
+
+  useEffect(() => {
+    fetchOrdersData(setIsLoading, setOrdersData);
+  }, []);
+
+
   return (
-    <AppProvider>
+    <>
       <Header />
       <Tabs
         screenOptions={{
@@ -70,6 +82,6 @@ export default function TabsLayout() {
           }}
         />
       </Tabs>
-    </AppProvider>
+    </>
   );
 }

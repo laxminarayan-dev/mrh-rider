@@ -1,3 +1,4 @@
+import { AppProvider } from "@/lib/AppContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -39,13 +40,16 @@ export default function RootLayout() {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#09090b" }}>
       <KeyboardProvider>
         <StatusBar barStyle="light-content" backgroundColor="#09090b" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: "fade",
-            contentStyle: { backgroundColor: "#09090b" },
-          }}
-        />
+        <AppProvider>
+
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: "fade",
+              contentStyle: { backgroundColor: "#09090b" },
+            }}
+          />
+        </AppProvider>
 
         {loading && <LoderWithImage />}
       </KeyboardProvider>
