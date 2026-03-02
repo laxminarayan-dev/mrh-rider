@@ -13,6 +13,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Loader from "../../components/mycomponents/Loader";
 import { normalize } from "../../lib/normalize";
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -57,14 +58,30 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       setAuthLoading(true);
-      await AsyncStorage.setItem("userToken", "email + password");
-      router.replace("/(tabs)");
+      if (email.trim() === "" || password.trim() === "") {
+        setAuthLoading(false);
+        setError("Please enter both email and password.");
+        return;
+      }
+      const response = await fetch(`${BACKEND_URL}/api/rider/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (data.token) {
+        await AsyncStorage.setItem("userToken", data.token);
+        await AsyncStorage.setItem("riderId", data.employee._id);
+        router.replace("/(tabs)");
+      } else {
+        setError(data.message || "Login failed");
+      }
     } catch (e) {
       console.log(e);
     } finally {
-      setTimeout(() => {
-        setAuthLoading(false);
-      }, 5000);
+      setAuthLoading(false);
     }
   };
 
@@ -159,7 +176,7 @@ export default function Login() {
                     marginBottom: normalize(8),
                   }}
                 >
-                  Invalid Credentials
+                  Something went wrong
                 </Text>
                 <Text
                   style={{

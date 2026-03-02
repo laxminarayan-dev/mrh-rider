@@ -4,16 +4,20 @@ import { Tabs } from "expo-router";
 import { useEffect } from "react";
 import Header from "../../components/mycomponents/Header";
 import { useAppContext } from "../../lib/AppContext";
-import fetchOrdersData from "../../lib/fetchOrdersData";
+import fetchOrdersData from "../../utils/db/fetchOrdersData";
+import fetchRiderInfo from "../../utils/db/fetchRiderInfo";
 
+export const refresh = ({ setOrdersData, setIsLoading, setRiderInfo }) => {
+  // This function can be used to trigger a refresh in child components if needed
+  fetchOrdersData(setIsLoading, setOrdersData);
+  fetchRiderInfo(setIsLoading, setRiderInfo);
+}
 
 export default function TabsLayout() {
-
-
-  const { setOrdersData, setIsLoading } = useAppContext();
+  const { setOrdersData, setIsLoading, setRiderInfo } = useAppContext();
 
   useEffect(() => {
-    fetchOrdersData(setIsLoading, setOrdersData);
+    refresh({ setOrdersData, setIsLoading, setRiderInfo });
   }, []);
 
 

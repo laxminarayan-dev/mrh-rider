@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -9,12 +10,14 @@ import {
 import { EmptyState, OrderRow, StatCard, WelcomeCard } from "../../components/mycomponents/HomeComponents";
 import { NewOrderPopup } from "../../components/mycomponents/NewOrderPopup";
 import { useAppContext } from "../../lib/AppContext";
+import { refresh } from "./_layout";
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function Home() {
-  const { isOnline, ordersData, handleActiveStatusChange, isLoading } = useAppContext();
+  const { isOnline, ordersData, handleActiveStatusChange, isLoading, setIsLoading, setRiderInfo, setOrdersData } = useAppContext();
   const [showNewOrder, setShowNewOrder] = useState(false); // Control new order popup visibility
   const [historyData, setHistoryData] = useState([]); // Store order history data
+  const [refreshing, setRefreshing] = useState(false); // Control pull-to-refresh state
 
   useEffect(() => {
     if (ordersData && ordersData.length > 0) {
@@ -37,6 +40,17 @@ export default function Home() {
       style={{ flex: 1, backgroundColor: "#09090b" }}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 48, paddingTop: 24 }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => {
+            // Simulate a refresh action
+            setRefreshing(true);
+            refresh({ setOrdersData, setIsLoading, setRiderInfo });
+            setTimeout(() => setRefreshing(false), 1000);
+          }}
+        />
+      }
     >
       {/* Welcome Hero */}
       <WelcomeCard isOnline={isOnline} onToggleOnline={() => handleActiveStatusChange(!isOnline)} />

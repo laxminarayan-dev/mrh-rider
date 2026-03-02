@@ -12,6 +12,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { useAppContext } from "../../lib/AppContext";
 import { getOrdersByStatus, getWeeklyData } from "../../lib/getOrderData";
 import getTimeAndDate from "../../lib/getTimeAndDate";
 import { normalize } from "../../lib/normalize";
@@ -81,6 +82,7 @@ export function PulseRing({ color = "#d4a843", delay = 0 }) {
 
 // ─── Hero Welcome Card ───────────────────────────────────────────────────────
 export function WelcomeCard({ isOnline = false, onToggleOnline = () => { } }) {
+    const { riderInfo } = useAppContext();
     const anim = useRef(new Animated.Value(0)).current;
     const [isConfirmationModelVisible, setConfirmationModelVisible] = useState(false);
 
@@ -143,7 +145,7 @@ export function WelcomeCard({ isOnline = false, onToggleOnline = () => { } }) {
                                 Welcome back
                             </Text>
                             <Text style={{ fontSize: normalize(22), color: "#f0f0f0", fontWeight: "800", letterSpacing: -0.3 }}>
-                                Lucky Jaiswal
+                                {riderInfo?.name || "Rider"}
                             </Text>
                         </View>
 

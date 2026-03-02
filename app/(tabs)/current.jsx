@@ -1,19 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  RefreshControl,
   ScrollView,
   Text,
-  View
+  View,
 } from "react-native";
 import { EmptyCurrentOrders, GPSOffPlaceholder, NoPermissonPlaceholder, OfflinePlaceholder, OrderCard } from "../../components/mycomponents/CurrentComponent/CurrentAllComponents";
 import { useLocationStatus } from "../../components/mycomponents/CurrentComponent/useLocationStatus";
 import { useAppContext } from "../../lib/AppContext";
 import hasArrived, { getDistanceMeters } from "../../lib/hasArived";
 import { normalize } from "../../lib/normalize";
+import { refresh } from "./_layout";
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 function Current() {
-  const { ordersData, isOnline } = useAppContext();
+  const { ordersData, isOnline, setIsLoading, setOrdersData, setRiderInfo } = useAppContext();
+  const [refreshing, setRefreshing] = useState(false); // Control pull-to-refresh state
   const [orders, setOrders] = useState([]);
   const [sortedOrders, setSortedOrders] = useState([]);
   const [currentOrder, setCurrentOrder] = useState(null);
@@ -124,6 +127,17 @@ function Current() {
         paddingBottom: normalize(100),
         paddingTop: normalize(24),
       }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => {
+            // Simulate a refresh action
+            setRefreshing(true);
+            refresh({ setOrdersData, setIsLoading, setRiderInfo });
+            setTimeout(() => setRefreshing(false), 1000);
+          }}
+        />
+      }
     >
       {/* Header */}
       <View

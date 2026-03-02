@@ -1,16 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useState } from "react";
-import { Alert } from 'react-native';
-import fetchOrdersData from "../lib/fetchOrdersData";
+import fetchOrdersData from "../utils/db/fetchOrdersData";
 import { socket } from "./socket";
 
 const AppContext = createContext();
-
 
 export function AppProvider({ children }) {
     const [ordersData, setOrdersData] = useState([]);
     const [isOnline, setIsOnline] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [riderInfo, setRiderInfo] = useState(null);
 
     const handleActiveStatusChange = async (isOnline) => {
         const riderId = await AsyncStorage.getItem("riderId") || "699c14039bdfc2203923f676"; // Fallback to a default value if not found
@@ -30,7 +29,6 @@ export function AppProvider({ children }) {
         }
     };
 
-
     useEffect(() => {
         let mounted = true;
 
@@ -46,7 +44,6 @@ export function AppProvider({ children }) {
             socket.emit("join:rider", riderId);
 
             socket.on("connect", () => {
-                Alert.alert("Connected to server", `Socket ID: ${socket.id}`);
                 console.log("Socket connected:", socket.id);
             });
 
@@ -71,7 +68,7 @@ export function AppProvider({ children }) {
     }, []);
 
     return (
-        <AppContext.Provider value={{ isOnline, setIsOnline, ordersData, setOrdersData, isLoading, setIsLoading, handleActiveStatusChange }}>
+        <AppContext.Provider value={{ isOnline, setIsOnline, ordersData, setOrdersData, isLoading, setIsLoading, handleActiveStatusChange, riderInfo, setRiderInfo }}>
             {children}
         </AppContext.Provider>
     );

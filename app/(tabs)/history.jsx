@@ -2,6 +2,7 @@ import { devideOrdersByDate } from "@/lib/getOrderData";
 import { Feather } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -10,11 +11,13 @@ import {
 import { EmptyHistory, HistoryCard } from "../../components/mycomponents/HistoryComponents";
 import { useAppContext } from "../../lib/AppContext";
 import { normalize } from "../../lib/normalize";
+import { refresh } from "./_layout";
 
 function History() {
-  const { ordersData } = useAppContext();
+  const { ordersData, setIsLoading, setOrdersData, setRiderInfo } = useAppContext();
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [refreshing, setRefreshing] = useState(false); // Control pull-to-refresh state
 
   useEffect(() => {
     setOrders(
@@ -37,6 +40,17 @@ function History() {
         paddingBottom: normalize(48),
         paddingTop: normalize(24),
       }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => {
+            // Simulate a refresh action
+            setRefreshing(true);
+            refresh({ setOrdersData, setIsLoading, setRiderInfo });
+            setTimeout(() => setRefreshing(false), 1000);
+          }}
+        />
+      }
     >
       {/* Header */}
       <View
